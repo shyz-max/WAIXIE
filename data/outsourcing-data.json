@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "appName": "外协管理工具",
+    "appVersion": "0.5.0",
+    "schemaVersion": 1,
+    "storage": "local-json-file",
+    "savedAt": "2026-06-13T14:14:22.528Z"
+  },
+  "data": {
+    "plans": [],
+    "prices": [],
+    "progress": [],
+    "contracts": [],
+    "negotiations": [],
+    "accounts": []
+  }
+}

@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>外协管理工具</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="模块导航">
+        <div class="brand">
+          <span class="brand-mark">协</span>
+          <div>
+            <strong>外协管理</strong>
+            <small>计划 · 价格 · 进度 · 合同 · 纪要 · 挂账</small>
+          </div>
+        </div>
+        <nav class="nav">
+          <button class="nav-item active" data-view="dashboard" type="button">概览</button>
+          <button class="nav-item" data-view="plans" type="button">外协计划</button>
+          <button class="nav-item" data-view="prices" type="button">价格管理</button>
+          <button class="nav-item" data-view="progress" type="button">外协进度</button>
+          <button class="nav-item" data-view="contracts" type="button">外协合同</button>
+          <button class="nav-item" data-view="negotiations" type="button">谈判纪要</button>
+          <button class="nav-item" data-view="accounts" type="button">挂账管理</button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <h1 id="page-title">概览</h1>
+            <p id="page-subtitle">查看外协业务的关键状态和风险。</p>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboard">
+          <div class="metric-grid">
+            <article class="metric">
+              <span>计划总数</span>
+              <strong id="metric-plans">0</strong>
+            </article>
+            <article class="metric">
+              <span>进行中</span>
+              <strong id="metric-running">0</strong>
+            </article>
+            <article class="metric">
+              <span>待结金额</span>
+              <strong id="metric-unpaid">¥0</strong>
+            </article>
+            <article class="metric">
+              <span>逾期任务</span>
+              <strong id="metric-overdue">0</strong>
+            </article>
+            <article class="metric">
+              <span>有效合同</span>
+              <strong id="metric-contracts">0</strong>
+            </article>
+            <article class="metric">
+              <span>待跟进纪要</span>
+              <strong id="metric-negotiations">0</strong>
+            </article>
+          </div>
+
+          <div class="two-column">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>近期交付</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>项目</th>
+                      <th>外协方</th>
+                      <th>交期</th>
+                      <th>状态</th>
+                    </tr>
+                  </thead>
+                  <tbody id="upcoming-table"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h2>挂账提醒</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>外协方</th>
+                      <th>金额</th>
+                      <th>到期日</th>
+                      <th>状态</th>
+                    </tr>
+                  </thead>
+                  <tbody id="account-alerts-table"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h2>合同提醒</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>合同编号</th>
+                      <th>外协方</th>
+                      <th>到期日</th>
+                      <th>状态</th>
+                    </tr>
+                  </thead>
+                  <tbody id="contract-alerts-table"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h2>谈判跟进</h2>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>主题</th>
+                      <th>外协方</th>
+                      <th>跟进日期</th>
+                      <th>状态</th>
+                    </tr>
+                  </thead>
+                  <tbody id="negotiation-alerts-table"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="plans">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新增外协计划</h2>
+            </div>
+            <form class="form-grid" id="plan-form">
+              <label>
+                项目名称
+                <input name="project" required placeholder="例如：机加工批次 A-0613" />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required placeholder="供应商或加工厂名称" />
+              </label>
+              <label>
+                工序/内容
+                <input name="process" required placeholder="例如：喷涂、热处理、CNC" />
+              </label>
+              <label>
+                数量
+                <input name="quantity" min="1" required type="number" />
+              </label>
+              <label>
+                计划交期
+                <input name="dueDate" required type="date" />
+              </label>
+              <label>
+                优先级
+                <select name="priority">
+                  <option>普通</option>
+                  <option>加急</option>
+                  <option>重点</option>
+                </select>
+              </label>
+              <label class="span-2">
+                备注
+                <input name="note" placeholder="质量要求、图纸版本、包装要求等" />
+              </label>
+              <button class="primary-button" type="submit">保存计划</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>计划列表</h2>
+              <div class="panel-tools">
+                <a class="ghost-button" href="templates/外协计划导入模板.xlsx" download>下载导入模板</a>
+                <label class="primary-button" for="plan-excel-import">导入Excel</label>
+                <input id="plan-excel-import" type="file" accept=".xlsx,.xls" hidden />
+                <input class="search" id="plan-search" placeholder="搜索项目、外协方、工序" />
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目</th>
+                    <th>外协方</th>
+                    <th>工序</th>
+                    <th>数量</th>
+                    <th>交期</th>
+                    <th>优先级</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="plans-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="prices">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新增价格</h2>
+            </div>
+            <form class="form-grid" id="price-form">
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                工序/物料
+                <input name="item" required />
+              </label>
+              <label>
+                单位
+                <input name="unit" required placeholder="件、公斤、米、批" />
+              </label>
+              <label>
+                单价
+                <input name="price" min="0" required step="0.01" type="number" />
+              </label>
+              <label>
+                生效日期
+                <input name="effectiveDate" required type="date" />
+              </label>
+              <label>
+                税率
+                <input name="taxRate" min="0" step="0.01" type="number" placeholder="例如：13" />
+              </label>
+              <button class="primary-button" type="submit">保存价格</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>价格台账</h2>
+              <input class="search" id="price-search" placeholder="搜索外协方、工序" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>外协方</th>
+                    <th>工序/物料</th>
+                    <th>单位</th>
+                    <th>单价</th>
+                    <th>生效日期</th>
+                    <th>税率</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="prices-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="progress">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>进度登记</h2>
+            </div>
+            <form class="form-grid" id="progress-form">
+              <label>
+                关联计划
+                <select name="planId" id="progress-plan-select" required></select>
+              </label>
+              <label>
+                当前状态
+                <select name="status">
+                  <option>待发出</option>
+                  <option>已发出</option>
+                  <option>加工中</option>
+                  <option>待检验</option>
+                  <option>已完成</option>
+                  <option>异常</option>
+                </select>
+              </label>
+              <label>
+                完成率
+                <input name="percent" min="0" max="100" required type="number" />
+              </label>
+              <label>
+                更新时间
+                <input name="updatedAt" required type="date" />
+              </label>
+              <label class="span-2">
+                进度说明
+                <input name="remark" placeholder="异常原因、剩余数量、检验结果等" />
+              </label>
+              <button class="primary-button" type="submit">保存进度</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>进度跟踪</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目</th>
+                    <th>外协方</th>
+                    <th>状态</th>
+                    <th>完成率</th>
+                    <th>更新时间</th>
+                    <th>说明</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="progress-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="contracts">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新增外协合同</h2>
+            </div>
+            <form class="form-grid" id="contract-form">
+              <label>
+                合同编号
+                <input name="contractNo" required placeholder="例如：WX-2026-001" />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                关联项目
+                <input name="project" required />
+              </label>
+              <label>
+                合同金额
+                <input name="amount" min="0" required step="0.01" type="number" />
+              </label>
+              <label>
+                签订日期
+                <input name="signDate" required type="date" />
+              </label>
+              <label>
+                到期日期
+                <input name="endDate" required type="date" />
+              </label>
+              <label>
+                合同状态
+                <select name="status">
+                  <option>草拟中</option>
+                  <option>已签订</option>
+                  <option>履行中</option>
+                  <option>已归档</option>
+                  <option>异常</option>
+                </select>
+              </label>
+              <label>
+                负责人
+                <input name="owner" placeholder="经办人或跟进人" />
+              </label>
+              <label class="span-2">
+                备注
+                <input name="note" placeholder="付款条款、质保要求、附件位置等" />
+              </label>
+              <button class="primary-button" type="submit">保存合同</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>合同台账</h2>
+              <input class="search" id="contract-search" placeholder="搜索编号、外协方、项目" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>合同编号</th>
+                    <th>外协方</th>
+                    <th>项目</th>
+                    <th>金额</th>
+                    <th>签订日期</th>
+                    <th>到期日期</th>
+                    <th>状态</th>
+                    <th>负责人</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="contracts-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="negotiations">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新增谈判纪要</h2>
+            </div>
+            <form class="form-grid" id="negotiation-form">
+              <label>
+                谈判日期
+                <input name="meetingDate" required type="date" />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                关联项目
+                <input name="project" required />
+              </label>
+              <label>
+                谈判主题
+                <input name="topic" required placeholder="价格、交期、质量、付款等" />
+              </label>
+              <label>
+                我方人员
+                <input name="ourAttendees" placeholder="例如：采购部 张三" />
+              </label>
+              <label>
+                对方人员
+                <input name="theirAttendees" placeholder="例如：销售经理 李四" />
+              </label>
+              <label>
+                下次跟进日期
+                <input name="followUpDate" type="date" data-optional-date />
+              </label>
+              <label>
+                纪要状态
+                <select name="status">
+                  <option>待跟进</option>
+                  <option>已确认</option>
+                  <option>已完成</option>
+                  <option>搁置</option>
+                </select>
+              </label>
+              <label class="span-2">
+                谈判结论
+                <input name="summary" required placeholder="本次谈判达成的价格、交期、责任边界等" />
+              </label>
+              <label class="span-2">
+                后续事项
+                <input name="actionItems" placeholder="需要补充报价、寄样、确认合同条款等" />
+              </label>
+              <button class="primary-button" type="submit">保存纪要</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>纪要台账</h2>
+              <input class="search" id="negotiation-search" placeholder="搜索主题、外协方、项目" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>外协方</th>
+                    <th>项目</th>
+                    <th>主题</th>
+                    <th>结论</th>
+                    <th>后续事项</th>
+                    <th>跟进日期</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="negotiations-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="accounts">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>新增挂账</h2>
+            </div>
+            <form class="form-grid" id="account-form">
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                关联项目
+                <input name="project" required />
+              </label>
+              <label>
+                金额
+                <input name="amount" min="0" required step="0.01" type="number" />
+              </label>
+              <label>
+                挂账日期
+                <input name="accountDate" required type="date" />
+              </label>
+              <label>
+                到期日
+                <input name="dueDate" required type="date" />
+              </label>
+              <label>
+                付款状态
+                <select name="payStatus">
+                  <option>未付款</option>
+                  <option>部分付款</option>
+                  <option>已付款</option>
+                </select>
+              </label>
+              <label class="span-2">
+                发票/凭证
+                <input name="voucher" placeholder="发票号、对账单号或备注" />
+              </label>
+              <button class="primary-button" type="submit">保存挂账</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>挂账台账</h2>
+              <input class="search" id="account-search" placeholder="搜索外协方、项目、凭证" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>外协方</th>
+                    <th>项目</th>
+                    <th>金额</th>
+                    <th>挂账日期</th>
+                    <th>到期日</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="accounts-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="vendor/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
