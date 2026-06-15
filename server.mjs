@@ -1,5 +1,6 @@
 import http from "node:http";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,6 +8,7 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(rootDir, "data");
 const dataFile = path.join(dataDir, "outsourcing-data.json");
 const port = Number(process.env.PORT || process.argv[2] || 8765);
+const host = process.env.HOST || "0.0.0.0";
 
 const defaultEnvelope = {
   meta: {
@@ -112,7 +114,16 @@ const server = http.createServer(async (req, res) => {
 });
 
 await ensureDataFile();
-server.listen(port, "127.0.0.1", () => {
+server.listen(port, host, () => {
+  const lanAddresses = Object.values(os.networkInterfaces())
+    .flat()
+    .filter((item) => item && item.family === "IPv4" && !item.internal)
+    .map((item) => `http://${item.address}:${port}`);
+
   console.log(`外协管理工具已启动：http://127.0.0.1:${port}`);
+  if (lanAddresses.length > 0) {
+    console.log("局域网访问地址：");
+    lanAddresses.forEach((address) => console.log(`  ${address}`));
+  }
   console.log(`数据文件：${dataFile}`);
 });

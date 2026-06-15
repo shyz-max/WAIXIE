@@ -3,15 +3,312 @@
     "appName": "外协管理工具",
     "appVersion": "0.5.0",
     "schemaVersion": 1,
-    "storage": "local-json-file",
-    "savedAt": "2026-06-13T14:14:22.528Z"
+    "storageKey": "outsourcing-management-data",
+    "savedAt": "2026-06-15T17:05:35.459Z",
+    "storage": "local-json-file"
   },
   "data": {
-    "plans": [],
-    "prices": [],
-    "progress": [],
-    "contracts": [],
-    "negotiations": [],
-    "accounts": []
+    "plans": [
+      {
+        "id": "plan-001",
+        "taskNo": "TASK-0001",
+        "drawingNo": "A-0615",
+        "name": "铝件机加工",
+        "project": "A-0615 铝件机加工",
+        "vendor": "华东精密加工",
+        "process": "CNC",
+        "quantity": 120,
+        "dueDate": "2026-06-22",
+        "priority": "加急",
+        "note": "按图纸 V3 加工，重点控制孔位公差"
+      },
+      {
+        "id": "plan-002",
+        "taskNo": "TASK-0002",
+        "drawingNo": "B-0620",
+        "name": "表面喷涂",
+        "project": "B-0620 表面喷涂",
+        "vendor": "华东表面处理",
+        "process": "喷涂",
+        "quantity": 80,
+        "dueDate": "2026-06-25",
+        "priority": "普通",
+        "note": "颜色按色卡 RAL7035"
+      },
+      {
+        "id": "plan-003",
+        "taskNo": "TASK-0003",
+        "drawingNo": "C-0622",
+        "name": "热处理批次",
+        "project": "C-0622 热处理批次",
+        "vendor": "苏南热处理",
+        "process": "热处理",
+        "quantity": 260,
+        "dueDate": "2026-06-28",
+        "priority": "重点",
+        "note": "硬度 HRC 42-46，需附检测报告"
+      },
+      {
+        "id": "plan-004",
+        "taskNo": "TASK-0004",
+        "drawingNo": "D-0624",
+        "name": "镀锌件",
+        "project": "D-0624 镀锌件",
+        "vendor": "江北电镀",
+        "process": "镀锌",
+        "quantity": 500,
+        "dueDate": "2026-07-02",
+        "priority": "普通",
+        "note": "蓝白锌，盐雾 48 小时"
+      },
+      {
+        "id": "plan-005",
+        "taskNo": "TASK-0005",
+        "drawingNo": "E-0625",
+        "name": "激光切割",
+        "project": "E-0625 激光切割",
+        "vendor": "华东精密加工",
+        "process": "激光切割",
+        "quantity": 60,
+        "dueDate": "2026-06-30",
+        "priority": "加急",
+        "note": "板厚 6mm，切割后去毛刺"
+      },
+      {
+        "id": "plan-006",
+        "taskNo": "TASK-0006",
+        "drawingNo": "F-0701",
+        "name": "包装辅材",
+        "project": "F-0701 包装辅材",
+        "vendor": "启明包装",
+        "process": "包装",
+        "quantity": 300,
+        "dueDate": "2026-07-06",
+        "priority": "普通",
+        "note": "纸箱加防潮袋"
+      }
+    ],
+    "prices": [
+      {
+        "id": "price-001",
+        "drawingNo": "A-0615",
+        "name": "铝件机加工",
+        "vendor": "华东精密加工",
+        "item": "CNC",
+        "unit": "件",
+        "price": 38,
+        "effectiveDate": "2026-06-01",
+        "taxRate": 13,
+        "negotiationNo": "001",
+        "priceSheetNo": "MGJB-2026-0001"
+      },
+      {
+        "id": "price-002",
+        "drawingNo": "E-0625",
+        "name": "激光切割",
+        "vendor": "华东精密加工",
+        "item": "激光切割",
+        "unit": "件",
+        "price": 22,
+        "effectiveDate": "2026-06-01",
+        "taxRate": 13
+      },
+      {
+        "id": "price-003",
+        "drawingNo": "B-0620",
+        "name": "表面喷涂",
+        "vendor": "华东表面处理",
+        "item": "喷涂",
+        "unit": "件",
+        "price": 8.5,
+        "effectiveDate": "2026-06-01",
+        "taxRate": 13
+      },
+      {
+        "id": "price-004",
+        "drawingNo": "C-0622",
+        "name": "热处理批次",
+        "vendor": "苏南热处理",
+        "item": "热处理",
+        "unit": "件",
+        "price": 6.8,
+        "effectiveDate": "2026-06-05",
+        "taxRate": 13
+      },
+      {
+        "id": "price-005",
+        "drawingNo": "D-0624",
+        "name": "镀锌件",
+        "vendor": "江北电镀",
+        "item": "镀锌",
+        "unit": "件",
+        "price": 2.4,
+        "effectiveDate": "2026-06-03",
+        "taxRate": 13
+      }
+    ],
+    "progress": [
+      {
+        "id": "progress-001",
+        "planId": "plan-001",
+        "status": "加工中",
+        "percent": 45,
+        "updatedAt": "2026-06-15",
+        "remark": "材料已到厂，首件确认中"
+      },
+      {
+        "id": "progress-002",
+        "planId": "plan-002",
+        "status": "已发出",
+        "percent": 20,
+        "updatedAt": "2026-06-15",
+        "remark": "已发出 80 件待喷涂"
+      },
+      {
+        "id": "progress-003",
+        "planId": "plan-003",
+        "status": "待发出",
+        "percent": 0,
+        "updatedAt": "2026-06-15",
+        "remark": "等待生产交接"
+      },
+      {
+        "id": "progress-004",
+        "planId": "plan-004",
+        "status": "异常",
+        "percent": 10,
+        "updatedAt": "2026-06-15",
+        "remark": "供应商反馈槽位紧张，需确认交期"
+      }
+    ],
+    "contracts": [
+      {
+        "id": "contract-001",
+        "contractNo": "2026-三分厂-0001",
+        "vendor": "华东精密加工",
+        "project": "A-0615 铝件机加工、E-0625 激光切割",
+        "contractItems": [
+          {
+            "label": "TASK-0001 / A-0615 / 铝件机加工 / CNC / 120",
+            "taskNo": "TASK-0001",
+            "drawingNo": "A-0615",
+            "name": "铝件机加工",
+            "process": "CNC",
+            "quantity": 120
+          },
+          {
+            "label": "TASK-0005 / E-0625 / 激光切割 / 激光切割 / 60",
+            "taskNo": "TASK-0005",
+            "drawingNo": "E-0625",
+            "name": "激光切割",
+            "process": "激光切割",
+            "quantity": 60
+          }
+        ],
+        "amount": 5880,
+        "signDate": "2026-06-15",
+        "endDate": "2026-07-15",
+        "status": "已签订",
+        "owner": "采购部 张三",
+        "note": "含 CNC 与激光切割两项，月结 30 天"
+      },
+      {
+        "id": "contract-002",
+        "contractNo": "WX-20260612-002",
+        "vendor": "华东表面处理",
+        "project": "B-0620 表面喷涂",
+        "contractItems": [
+          {
+            "label": "TASK-0002 / B-0620 / 表面喷涂 / 喷涂 / 80",
+            "taskNo": "TASK-0002",
+            "drawingNo": "B-0620",
+            "name": "表面喷涂",
+            "process": "喷涂",
+            "quantity": 80
+          }
+        ],
+        "amount": 680,
+        "signDate": "2026-06-12",
+        "endDate": "2026-06-30",
+        "status": "履行中",
+        "owner": "采购部 李四",
+        "note": "喷涂颜色需按样板确认"
+      }
+    ],
+    "negotiations": [
+      {
+        "id": "neg-001",
+        "meetingDate": "2026-06-14",
+        "vendor": "江北电镀",
+        "project": "D-0624 / 镀锌件",
+        "negotiationItems": [
+          {
+            "label": "D-0624 / 镀锌件"
+          }
+        ],
+        "topic": "镀锌交期与盐雾要求",
+        "ourAttendees": "采购部 张三、质量部 王五",
+        "theirAttendees": "业务经理 赵工",
+        "followUpDate": "2026-06-17",
+        "status": "待跟进",
+        "summary": "对方可满足盐雾 48 小时，但交期需排产确认。",
+        "actionItems": "对方 6 月 17 日前反馈最早完工日期。",
+        "negotiationNo": "001"
+      },
+      {
+        "id": "neg-002",
+        "meetingDate": "2026-06-13",
+        "vendor": "苏南热处理",
+        "project": "C-0622 热处理批次",
+        "negotiationItems": [
+          {
+            "label": "C-0622 / 热处理批次"
+          }
+        ],
+        "topic": "热处理单价复核",
+        "ourAttendees": "采购部 李四",
+        "theirAttendees": "销售经理 陈工",
+        "followUpDate": "",
+        "status": "已确认",
+        "summary": "单价按 6.8 元/件执行，需随货提供硬度报告。",
+        "actionItems": "合同条款中补充检测报告要求。"
+      }
+    ],
+    "accounts": [
+      {
+        "id": "account-001",
+        "vendor": "华东精密加工",
+        "project": "A-0615 铝件机加工",
+        "accountItems": [
+          {
+            "label": "A-0615 / 铝件机加工",
+            "drawingNo": "A-0615",
+            "name": "铝件机加工"
+          }
+        ],
+        "amount": 4560,
+        "accountDate": "2026-06-15",
+        "dueDate": "2026-07-15",
+        "payStatus": "未付款",
+        "voucher": "WX-20260615-001"
+      },
+      {
+        "id": "account-002",
+        "vendor": "华东表面处理",
+        "project": "B-0620 表面喷涂",
+        "accountItems": [
+          {
+            "label": "B-0620 / 表面喷涂",
+            "drawingNo": "B-0620",
+            "name": "表面喷涂"
+          }
+        ],
+        "amount": 680,
+        "accountDate": "2026-06-14",
+        "dueDate": "2026-07-14",
+        "payStatus": "部分付款",
+        "voucher": "对账单 DZ-0614"
+      }
+    ]
   }
 }

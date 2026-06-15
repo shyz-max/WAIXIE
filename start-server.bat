@@ -1,4 +1,9 @@
 @echo off
-cd /d "%~dp0"
-node server.mjs
+pushd "%~dp0"
+if exist "%~dp0node\node.exe" (
+  "%~dp0node\node.exe" server.js
+) else (
+  node server.js
+)
+popd
 pause

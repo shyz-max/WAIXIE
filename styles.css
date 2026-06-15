@@ -141,6 +141,46 @@ h2 {
   justify-content: flex-end;
 }
 
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field-group label {
+  font-weight: 500;
+}
+
+.form-field-tools {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.task-toolbar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 14px;
+  padding: 18px;
+}
+
+.task-filters,
+.price-filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  gap: 12px;
+  padding: 0 18px 18px;
+  align-items: end;
+}
+
+.task-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .primary-button,
 .ghost-button,
 .danger-button {
@@ -188,7 +228,7 @@ h2 {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px;
 }
 
@@ -283,7 +323,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 38px;
   border: 1px solid var(--line);
@@ -293,8 +334,14 @@ select {
   background: #fff;
 }
 
+textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: 2px solid rgba(34, 105, 87, 0.18);
   border-color: var(--brand);
 }
@@ -334,6 +381,57 @@ th {
 
 tr:last-child td {
   border-bottom: 0;
+}
+
+.contract-sub-row td {
+  padding: 0;
+  background: #f9faf7;
+  border-bottom: 2px solid var(--line);
+}
+
+.contract-sub-table {
+  width: 100%;
+  min-width: auto;
+  margin: 0;
+}
+
+.contract-sub-table th {
+  background: #eef1ea;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.contract-sub-table td {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.contract-sub-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.contract-expand-toggle {
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+
+.contract-expand-toggle:hover {
+  background: var(--line);
+}
+
+.contract-expand-toggle.expanded {
+  transform: rotate(90deg);
 }
 
 .badge {
@@ -404,6 +502,9 @@ tr:last-child td {
   .metric-grid,
   .data-summary,
   .two-column,
+  .task-toolbar,
+  .task-filters,
+  .price-filters,
   .form-grid {
     grid-template-columns: 1fr;
   }
