@@ -10,6 +10,7 @@ const titles = {
   progress: ["外协进度", "跟踪每个计划的状态、完成率和异常说明。"],
   contracts: ["外协合同", "登记合同编号、金额、期限、状态和负责人。"],
   negotiations: ["谈判纪要", "记录外协谈判过程、结论和后续跟进事项。"],
+  pricingProcesses: ["定价流程", "记录外协定价过程、工序、单价和后续跟进事项。"],
   accounts: ["挂账管理", "记录外协应付、到期日和付款状态。"],
 };
 
@@ -18,6 +19,7 @@ let selectedTaskIds = new Set();
 let editingPriceId = null;
 let editingContractId = null;
 let editingNegotiationId = null;
+let editingPricingProcessId = null;
 let editingAccountId = null;
 
 const $ = (selector) => document.querySelector(selector);
@@ -33,6 +35,7 @@ function createDefaultState() {
     prices: [],
     contracts: [],
     negotiations: [],
+    pricingProcesses: [],
     progress: [],
     accounts: [],
   };
@@ -98,6 +101,7 @@ function normalizeState(data) {
     progress: Array.isArray(source && source.progress) ? source.progress : [],
     contracts: Array.isArray(source && source.contracts) ? source.contracts : [],
     negotiations: Array.isArray(source && source.negotiations) ? source.negotiations : [],
+    pricingProcesses: Array.isArray(source && source.pricingProcesses) ? source.pricingProcesses : [],
     accounts: Array.isArray(source && source.accounts) ? source.accounts : [],
   };
 }
@@ -163,6 +167,19 @@ function nextNegotiationNo() {
   const prefix = `JY-${today().replaceAll("-", "")}`;
   const maxNumber = state.negotiations.reduce((max, item) => {
     const no = String(item.negotiationNo || "");
+    if (no.startsWith(prefix)) {
+      const num = parseInt(no.slice(prefix.length + 1), 10);
+      return isNaN(num) ? max : Math.max(max, num);
+    }
+    return max;
+  }, 0);
+  return `${prefix}-${String(maxNumber + 1).padStart(3, "0")}`;
+}
+
+function nextPricingProcessNo() {
+  const prefix = `PJ-${today().replaceAll("-", "")}`;
+  const maxNumber = state.pricingProcesses.reduce((max, item) => {
+    const no = String(item.pricingNo || "");
     if (no.startsWith(prefix)) {
       const num = parseInt(no.slice(prefix.length + 1), 10);
       return isNaN(num) ? max : Math.max(max, num);
@@ -263,7 +280,8 @@ function statusBadge(status, dueDate) {
     status === "已签订" ||
     status === "已归档" ||
     status === "已签合同" ||
-    status === "已交付"
+    status === "已交付" ||
+    status === "已导入价格库"
   ) {
     return `<span class="badge ok">${label}</span>`;
   }
@@ -619,9 +637,20 @@ function priceMatchesFilters(item) {
 
   if (
     keyword &&
-    ![item.vendor, item.item, item.unit, item.price, item.effectiveDate, item.taxRate, item.negotiationNo, item.priceSheetNo, drawingNos, names].some((value) =>
-      String(value || "").toLowerCase().includes(keyword),
-    )
+    ![
+      item.vendor,
+      item.item,
+      item.unit,
+      item.price,
+      item.effectiveDate,
+      item.taxRate,
+      item.negotiationNo,
+      item.priceSheetNo,
+      item.pricingNo,
+      item.note,
+      drawingNos,
+      names,
+    ].some((value) => String(value || "").toLowerCase().includes(keyword))
   ) {
     return false;
   }
@@ -639,6 +668,8 @@ function pricePayload(data) {
     ...data,
     drawingNo: String(data.drawingNo || "").trim(),
     name: String(data.name || "").trim(),
+    pricingNo: String(data.pricingNo || data.priceSheetNo || "").trim(),
+    note: String(data.note || "").trim(),
     price: Number(data.price),
     taxRate: Number(data.taxRate || 0),
   };
@@ -665,7 +696,8 @@ function startPriceEdit(id) {
   form.elements.effectiveDate.value = item.effectiveDate || today();
   form.elements.taxRate.value = item.taxRate || 0;
   form.elements.negotiationNo.value = item.negotiationNo || "";
-  form.elements.priceSheetNo.value = item.priceSheetNo || "";
+  form.elements.priceSheetNo.value = item.priceSheetNo || item.pricingNo || "";
+  form.elements.note.value = item.note || "";
   $("#price-edit-panel").hidden = false;
   switchView("prices");
   form.elements.drawingNo.focus();
@@ -730,6 +762,143 @@ function negotiationItemsText(negotiation) {
     return negotiation.negotiationItems.map((item) => item.label || "").filter(Boolean).join("\n");
   }
   return String(negotiation.project || "");
+}
+
+function pricingProcessPayload(data) {
+  const pricingItems = parseContractItems(data.pricingItemsText || data.project);
+  const project = pricingItems.map((item) => item.label).join("、");
+  const { pricingItemsText, ...rest } = data;
+  const pricingNo = String(data.pricingNo || "").trim() || nextPricingProcessNo();
+  return {
+    ...rest,
+    pricingNo,
+    project,
+    pricingItems,
+  };
+}
+
+function pricingProcessItemsSummary(pricingProcess) {
+  if (Array.isArray(pricingProcess.pricingItems) && pricingProcess.pricingItems.length > 0) {
+    return pricingProcess.pricingItems.map((item) => item.label || "").filter(Boolean).join("、");
+  }
+  return String(pricingProcess.project || "");
+}
+
+function pricingProcessItemsText(pricingProcess) {
+  if (Array.isArray(pricingProcess.pricingItems) && pricingProcess.pricingItems.length > 0) {
+    return pricingProcess.pricingItems.map((item) => item.label || "").filter(Boolean).join("\n");
+  }
+  return String(pricingProcess.project || "");
+}
+
+function firstNumber(value) {
+  const match = String(value || "").match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : 0;
+}
+
+function unitFromQuantityUnit(value) {
+  const text = String(value || "").trim();
+  return text.replace(/[\d.\s]/g, "") || text;
+}
+
+function priceKey(price) {
+  return [price.vendor, price.drawingNo, price.name, price.item].map((value) => String(value || "").trim()).join("||");
+}
+
+function pricingProcessPriceRows(pricingProcess) {
+  const items =
+    Array.isArray(pricingProcess.pricingItems) && pricingProcess.pricingItems.length > 0
+      ? pricingProcess.pricingItems
+      : parseContractItems(pricingProcess.project);
+  return items
+    .map((item) => {
+      const parts = parseContractItemParts(item.label);
+      return pricePayload({
+        drawingNo: parts.drawingNo,
+        name: parts.name,
+        vendor: pricingProcess.vendor,
+        item: parts.process,
+        unit: unitFromQuantityUnit(parts.quantityUnit),
+        price: firstNumber(parts.unitPrice),
+        effectiveDate: pricingProcess.pricingDate || today(),
+        taxRate: 0,
+        negotiationNo: "",
+        priceSheetNo: pricingProcess.pricingNo || "",
+        pricingNo: pricingProcess.pricingNo || "",
+        pricingProcessId: pricingProcess.id || "",
+        note: parts.note || "",
+      });
+    })
+    .filter((item) => item.drawingNo && item.name && item.vendor && item.item && item.unit && item.price > 0 && item.effectiveDate);
+}
+
+function syncPricingProcessToPrices(id, previousPricingNo = "", removeWhenEmpty = false) {
+  const pricingProcess = state.pricingProcesses.find((item) => item.id === id);
+  if (!pricingProcess) return null;
+  const priceRows = pricingProcessPriceRows(pricingProcess);
+  const sourceMatches = (price) =>
+    price.pricingProcessId === id ||
+    (pricingProcess.pricingNo && (price.pricingNo === pricingProcess.pricingNo || price.priceSheetNo === pricingProcess.pricingNo)) ||
+    (previousPricingNo && (price.pricingNo === previousPricingNo || price.priceSheetNo === previousPricingNo));
+  const previousSourceKeys = new Set(state.prices.filter(sourceMatches).map(priceKey));
+  const nextPrices = state.prices.filter((price) => !sourceMatches(price));
+  if (priceRows.length === 0) {
+    if (removeWhenEmpty && previousSourceKeys.size > 0) {
+      state.prices = nextPrices;
+      state.pricingProcesses = state.pricingProcesses.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              priceImportStatus: "未导入",
+              priceImportedAt: "",
+              priceImportedCount: 0,
+            }
+          : item,
+      );
+      return { added: 0, updated: 0, removed: previousSourceKeys.size, count: 0 };
+    }
+    return null;
+  }
+  let added = 0;
+  let updated = 0;
+
+  priceRows.forEach((row) => {
+    const key = priceKey(row);
+    const index = nextPrices.findIndex((price) => priceKey(price) === key);
+    if (index >= 0) {
+      nextPrices[index] = { ...nextPrices[index], ...row };
+      updated += 1;
+    } else {
+      nextPrices.push({ id: crypto.randomUUID(), ...row });
+      if (previousSourceKeys.has(key)) updated += 1;
+      else added += 1;
+    }
+  });
+
+  state.prices = nextPrices;
+  state.pricingProcesses = state.pricingProcesses.map((item) =>
+    item.id === id
+      ? {
+          ...item,
+          priceImportStatus: "已导入价格库",
+          priceImportedAt: new Date().toISOString(),
+          priceImportedCount: priceRows.length,
+        }
+      : item,
+  );
+  return { added, updated, count: priceRows.length };
+}
+
+function importPricingProcessToPrices(id) {
+  const result = syncPricingProcessToPrices(id);
+  if (!result) {
+    alert("没有可导入价格库的明细，请确认定价流程明细中已填写图号、名称、工序、单位和单价。");
+    return;
+  }
+  saveState();
+  renderAll();
+  switchView("pricingProcesses");
+  alert(`已导入价格库：新增 ${result.added} 条，更新 ${result.updated} 条。`);
 }
 
 function accountPayload(data) {
@@ -850,6 +1019,28 @@ function startNegotiationEdit(id) {
   form.elements.meetingDate.focus();
 }
 
+function resetPricingProcessEdit() {
+  editingPricingProcessId = null;
+  $("#pricing-process-edit-panel").hidden = true;
+  resetForm($("#pricing-process-edit-form"));
+}
+
+function startPricingProcessEdit(id) {
+  const item = state.pricingProcesses.find((pricingProcess) => pricingProcess.id === id);
+  if (!item) return;
+  $("#pricing-process-create-panel").hidden = true;
+  editingPricingProcessId = id;
+  const form = $("#pricing-process-edit-form");
+  form.elements.pricingDate.value = item.pricingDate || today();
+  form.elements.pricingNo.value = item.pricingNo || "";
+  form.elements.vendor.value = item.vendor || "";
+  form.elements.pricingItemsText.value = pricingProcessItemsText(item);
+  form.elements.followUpDate.value = item.followUpDate || "";
+  $("#pricing-process-edit-panel").hidden = false;
+  switchView("pricingProcesses");
+  form.elements.pricingDate.focus();
+}
+
 function resetAccountEdit() {
   editingAccountId = null;
   $("#account-edit-panel").hidden = true;
@@ -926,7 +1117,7 @@ function renderPrices() {
   const rows = state.prices.filter(priceMatchesFilters);
   $("#prices-table").innerHTML =
     rows.length === 0
-      ? renderEmpty(11, "暂无价格")
+      ? renderEmpty(12, "暂无价格")
       : rows
           .map((item) => {
             const relatedPlans = plansForPrice(item);
@@ -942,7 +1133,8 @@ function renderPrices() {
               <td>${escapeHtml(item.effectiveDate)}</td>
               <td>${item.taxRate || 0}%</td>
               <td>${escapeHtml(item.negotiationNo || "-")}</td>
-              <td>${escapeHtml(item.priceSheetNo || "-")}</td>
+              <td>${escapeHtml(item.priceSheetNo || item.pricingNo || "-")}</td>
+              <td>${escapeHtml(item.note || "-")}</td>
               <td>
                 <button class="ghost-button" data-edit-price="${item.id}" type="button">修改</button>
                 <button class="danger-button" data-delete="prices" data-id="${item.id}" type="button">删除</button>
@@ -962,7 +1154,7 @@ function exportPricesExcel() {
     alert("没有可导出的价格数据。");
     return;
   }
-  const header = ["外协方", "图号", "名称", "工序/物料", "单位", "单价", "生效日期", "税率", "谈判纪要编号", "价格单号"];
+  const header = ["外协方", "图号", "名称", "工序/物料", "单位", "单价", "生效日期", "税率", "谈判纪要编号", "价格单号", "备注"];
   const data = rows.map((item) => {
     const relatedPlans = plansForPrice(item);
     const drawingNos = item.drawingNo || uniqueValues(relatedPlans.map(planDrawingNo)).join("、") || "";
@@ -977,7 +1169,8 @@ function exportPricesExcel() {
       item.effectiveDate || "",
       (item.taxRate || 0) + "%",
       item.negotiationNo || "",
-      item.priceSheetNo || "",
+      item.priceSheetNo || item.pricingNo || "",
+      item.note || "",
     ];
   });
   const sheet = XLSX.utils.aoa_to_sheet([header, ...data]);
@@ -1122,10 +1315,14 @@ function renderNegotiations() {
                       <td>${idx + 1}</td>
                       <td>${escapeHtml(parts.drawingNo)}</td>
                       <td>${escapeHtml(parts.name)}</td>
+                      <td>${escapeHtml(parts.process || "-")}</td>
+                      <td>${escapeHtml(parts.quantityUnit || "-")}</td>
+                      <td>${parts.unitPrice ? escapeHtml(parts.unitPrice) : "-"}</td>
+                      <td>${parts.amount ? escapeHtml(parts.amount) : "-"}</td>
                     </tr>`;
                   })
                   .join("")
-              : `<tr><td colspan="3" class="empty">暂无图号名称明细</td></tr>`;
+              : `<tr><td colspan="7" class="empty">暂无图号名称明细</td></tr>`;
 
             return `<tr class="negotiation-main-row" data-negotiation-id="${item.id}">
               <td>${
@@ -1150,6 +1347,80 @@ function renderNegotiations() {
                       <th>序号</th>
                       <th>图号</th>
                       <th>名称</th>
+                    </tr>
+                  </thead>
+                  <tbody>${subRows}</tbody>
+                </table>
+              </td>
+            </tr>`;
+          })
+          .join("");
+}
+
+function renderPricingProcesses() {
+  const keyword = $("#pricing-process-search").value.trim().toLowerCase();
+  const rows = state.pricingProcesses.filter((item) =>
+    [item.pricingNo, item.vendor, pricingProcessItemsSummary(item)].some((value) =>
+      String(value || "").toLowerCase().includes(keyword),
+    ),
+  );
+  $("#pricing-processes-table").innerHTML =
+    rows.length === 0
+      ? renderEmpty(7, "暂无定价流程")
+      : [...rows]
+          .sort((a, b) => String(b.pricingDate || "").localeCompare(String(a.pricingDate || "")))
+          .map((item) => {
+            const items =
+              Array.isArray(item.pricingItems) && item.pricingItems.length > 0 ? item.pricingItems : parseContractItems(item.project);
+            const hasItems = items.length > 0;
+            const subRows = hasItems
+              ? items
+                  .map((sub, idx) => {
+                    const parts = parseContractItemParts(sub.label);
+                    return `<tr>
+                      <td>${idx + 1}</td>
+                      <td>${escapeHtml(parts.drawingNo)}</td>
+                      <td>${escapeHtml(parts.name)}</td>
+                      <td>${escapeHtml(parts.process || "-")}</td>
+                      <td>${escapeHtml(parts.quantityUnit || "-")}</td>
+                      <td>${escapeHtml(parts.unitPrice || "-")}</td>
+                      <td>${escapeHtml(parts.amount || "-")}</td>
+                    </tr>`;
+                  })
+                  .join("")
+              : `<tr><td colspan="7" class="empty">暂无定价明细</td></tr>`;
+
+            return `<tr class="pricing-process-main-row" data-pricing-process-id="${item.id}">
+              <td>${
+                hasItems
+                  ? `<button class="contract-expand-toggle" data-toggle-pricing-process="${item.id}" type="button">▶</button>`
+                  : ""
+              }</td>
+              <td>${escapeHtml(item.pricingNo || "-")}</td>
+              <td>${escapeHtml(item.pricingDate)}</td>
+              <td>${escapeHtml(item.vendor)}</td>
+              <td>${escapeHtml(item.followUpDate || "-")}</td>
+              <td>${statusBadge(item.priceImportStatus || "未导入")}</td>
+              <td>
+                <button class="ghost-button" data-import-pricing-process="${item.id}" type="button">${
+                  item.priceImportStatus === "已导入价格库" ? "重新导入价格库" : "导入价格库"
+                }</button>
+                <button class="ghost-button" data-edit-pricing-process="${item.id}" type="button">修改</button>
+                <button class="danger-button" data-delete="pricingProcesses" data-id="${item.id}" type="button">删除</button>
+              </td>
+            </tr>
+            <tr class="contract-sub-row" id="pricing-process-sub-${item.id}" hidden>
+              <td colspan="7">
+                <table class="contract-sub-table">
+                  <thead>
+                    <tr>
+                      <th>序号</th>
+                      <th>图号</th>
+                      <th>名称</th>
+                      <th>工序</th>
+                      <th>数量/单位</th>
+                      <th>单价</th>
+                      <th>金额</th>
                     </tr>
                   </thead>
                   <tbody>${subRows}</tbody>
@@ -1226,6 +1497,7 @@ function renderAll() {
   renderProgress();
   renderContracts();
   renderNegotiations();
+  renderPricingProcesses();
   renderAccounts();
 }
 
@@ -1426,6 +1698,31 @@ function setupForms() {
     resetNegotiationEdit();
   });
 
+  $("#pricing-process-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.currentTarget);
+    addRecord("pricingProcesses", pricingProcessPayload(data));
+    resetForm(event.currentTarget);
+    $("#pricing-process-create-panel").hidden = true;
+  });
+
+  $("#pricing-process-edit-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!editingPricingProcessId) return;
+    const currentItem = state.pricingProcesses.find((item) => item.id === editingPricingProcessId);
+    const shouldSyncPrices = currentItem && currentItem.priceImportStatus === "已导入价格库";
+    const data = formData(event.currentTarget);
+    state.pricingProcesses = state.pricingProcesses.map((item) =>
+      item.id === editingPricingProcessId ? { ...item, ...pricingProcessPayload(data) } : item,
+    );
+    if (shouldSyncPrices) {
+      syncPricingProcessToPrices(editingPricingProcessId, currentItem.pricingNo || "", true);
+    }
+    saveState();
+    renderAll();
+    resetPricingProcessEdit();
+  });
+
   $("#account-form").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = formData(event.currentTarget);
@@ -1443,7 +1740,7 @@ function setupForms() {
   });
 }
 
-async function importContractItemsExcel(file, targetName) {
+async function importContractItemsExcel(file, targetSelector) {
   if (!window.XLSX) {
     alert("Excel 导入组件未加载，请刷新页面后重试。");
     return;
@@ -1515,9 +1812,9 @@ async function importContractItemsExcel(file, targetName) {
     return;
   }
 
-  const form = document.querySelector(`[name="${targetName}"]`);
-  if (form) {
-    form.value = form.value.trim() ? form.value.trim() + "\n" + lines.join("\n") : lines.join("\n");
+  const target = document.querySelector(targetSelector);
+  if (target) {
+    target.value = target.value.trim() ? target.value.trim() + "\n" + lines.join("\n") : lines.join("\n");
   }
   alert(`已导入 ${lines.length} 条标的物。`);
 }
@@ -1624,6 +1921,9 @@ async function importPriceExcel(file) {
     price: indexOf("单价", "价格"),
     effectiveDate: indexOf("生效日期", "生效日"),
     taxRate: indexOf("税率"),
+    negotiationNo: indexOf("谈判纪要编号", "纪要编号", "谈判编号"),
+    priceSheetNo: indexOf("价格单号", "价格编号", "定价单号"),
+    note: indexOf("备注", "说明"),
   };
 
   const missing = ["drawingNo", "name", "vendor", "item", "unit", "price", "effectiveDate"].filter((key) => columns[key] < 0);
@@ -1644,6 +1944,9 @@ async function importPriceExcel(file) {
         price: Number(row[columns.price] || 0),
         effectiveDate: excelDateToIso(row[columns.effectiveDate]),
         taxRate: columns.taxRate >= 0 ? Number(row[columns.taxRate] || 0) : 0,
+        negotiationNo: columns.negotiationNo >= 0 ? String(row[columns.negotiationNo] || "").trim() : "",
+        priceSheetNo: columns.priceSheetNo >= 0 ? String(row[columns.priceSheetNo] || "").trim() : "",
+        note: columns.note >= 0 ? String(row[columns.note] || "").trim() : "",
       }),
     )
     .filter((item) => item.drawingNo || item.name || item.vendor || item.item || item.unit || item.price || item.effectiveDate)
@@ -1664,7 +1967,7 @@ function setupEvents() {
     button.addEventListener("click", () => switchView(button.dataset.view));
   });
 
-  ["#plan-search", "#price-search", "#contract-search", "#negotiation-search", "#account-search"].forEach((selector) => {
+  ["#plan-search", "#price-search", "#contract-search", "#negotiation-search", "#pricing-process-search", "#account-search"].forEach((selector) => {
     $(selector).addEventListener("input", renderAll);
   });
   ["#price-filter-vendor", "#price-filter-item", "#price-filter-date-from", "#price-filter-date-to", "#price-filter-related"].forEach(
@@ -1724,6 +2027,16 @@ function setupEvents() {
     resetForm($("#negotiation-form"));
   });
   $("#cancel-negotiation-edit").addEventListener("click", resetNegotiationEdit);
+  $("#pricing-process-toggle-button").addEventListener("click", () => {
+    resetPricingProcessEdit();
+    $("#pricing-process-create-panel").hidden = false;
+    $("#pricing-process-form").elements.pricingDate.focus();
+  });
+  $("#pricing-process-cancel-button").addEventListener("click", () => {
+    $("#pricing-process-create-panel").hidden = true;
+    resetForm($("#pricing-process-form"));
+  });
+  $("#cancel-pricing-process-edit").addEventListener("click", resetPricingProcessEdit);
   $("#account-toggle-button").addEventListener("click", () => {
     resetAccountEdit();
     $("#account-create-panel").hidden = false;
@@ -1777,6 +2090,18 @@ function setupEvents() {
       }
       return;
     }
+    const pricingProcessToggleButton = event.target.closest("[data-toggle-pricing-process]");
+    if (pricingProcessToggleButton) {
+      const id = pricingProcessToggleButton.dataset.togglePricingProcess;
+      const subRow = document.getElementById(`pricing-process-sub-${id}`);
+      if (subRow) {
+        const isHidden = subRow.hidden;
+        subRow.hidden = !isHidden;
+        pricingProcessToggleButton.textContent = isHidden ? "▼" : "▶";
+        pricingProcessToggleButton.classList.toggle("expanded", isHidden);
+      }
+      return;
+    }
     const accountToggleButton = event.target.closest("[data-toggle-account]");
     if (accountToggleButton) {
       const id = accountToggleButton.dataset.toggleAccount;
@@ -1804,6 +2129,16 @@ function setupEvents() {
       startNegotiationEdit(editNegotiationButton.dataset.editNegotiation);
       return;
     }
+    const importPricingProcessButton = event.target.closest("[data-import-pricing-process]");
+    if (importPricingProcessButton) {
+      importPricingProcessToPrices(importPricingProcessButton.dataset.importPricingProcess);
+      return;
+    }
+    const editPricingProcessButton = event.target.closest("[data-edit-pricing-process]");
+    if (editPricingProcessButton) {
+      startPricingProcessEdit(editPricingProcessButton.dataset.editPricingProcess);
+      return;
+    }
     const editAccountButton = event.target.closest("[data-edit-account]");
     if (editAccountButton) {
       startAccountEdit(editAccountButton.dataset.editAccount);
@@ -1819,6 +2154,9 @@ function setupEvents() {
     }
     if (button.dataset.delete === "negotiations" && button.dataset.id === editingNegotiationId) {
       resetNegotiationEdit();
+    }
+    if (button.dataset.delete === "pricingProcesses" && button.dataset.id === editingPricingProcessId) {
+      resetPricingProcessEdit();
     }
     if (button.dataset.delete === "accounts" && button.dataset.id === editingAccountId) {
       resetAccountEdit();
@@ -1859,7 +2197,7 @@ function setupEvents() {
     const file = event.target.files[0];
     if (file) {
       try {
-        await importContractItemsExcel(file, "contractItemsText");
+        await importContractItemsExcel(file, "#contract-form [name='contractItemsText']");
       } catch (error) {
         alert(`导入失败：${error.message}`);
       }
@@ -1870,7 +2208,29 @@ function setupEvents() {
     const file = event.target.files[0];
     if (file) {
       try {
-        await importContractItemsExcel(file, "contractItemsText");
+        await importContractItemsExcel(file, "#contract-edit-form [name='contractItemsText']");
+      } catch (error) {
+        alert(`导入失败：${error.message}`);
+      }
+    }
+    event.target.value = "";
+  });
+  $("#pricing-process-excel-import").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        await importContractItemsExcel(file, "#pricing-process-form [name='pricingItemsText']");
+      } catch (error) {
+        alert(`导入失败：${error.message}`);
+      }
+    }
+    event.target.value = "";
+  });
+  $("#pricing-process-edit-excel-import").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        await importContractItemsExcel(file, "#pricing-process-edit-form [name='pricingItemsText']");
       } catch (error) {
         alert(`导入失败：${error.message}`);
       }

@@ -13,17 +13,18 @@
           <span class="brand-mark">协</span>
           <div>
             <strong>外协管理</strong>
-            <small>计划 · 价格 · 进度 · 合同 · 纪要 · 挂账</small>
+            <small>计划 · 纪要 · 定价 · 价格 · 进度 · 合同 · 挂账</small>
           </div>
         </div>
         <nav class="nav">
           <button class="nav-item active" data-view="dashboard" type="button">概览</button>
           <button class="nav-item" data-view="plans" type="button">新增外协计划</button>
           <button class="nav-item" data-view="tasks" type="button">外协任务汇总</button>
+          <button class="nav-item" data-view="negotiations" type="button">谈判纪要</button>
+          <button class="nav-item" data-view="pricingProcesses" type="button">定价流程</button>
           <button class="nav-item" data-view="prices" type="button">价格库</button>
           <button class="nav-item" data-view="progress" type="button">外协进度</button>
           <button class="nav-item" data-view="contracts" type="button">外协合同</button>
-          <button class="nav-item" data-view="negotiations" type="button">谈判纪要</button>
           <button class="nav-item" data-view="accounts" type="button">挂账管理</button>
         </nav>
       </aside>
@@ -345,6 +346,191 @@
           </section>
         </section>
 
+        <section class="view" id="negotiations">
+          <section class="panel" id="negotiation-create-panel" hidden>
+            <div class="panel-header">
+              <h2>新增谈判纪要</h2>
+            </div>
+            <form class="form-grid" id="negotiation-form">
+              <label>
+                谈判日期
+                <input name="meetingDate" required type="date" />
+              </label>
+              <label>
+                纪要编号
+                <input name="negotiationNo" placeholder="留空自动生成，例如：JY-20260616-001" />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                关联图号/名称
+                <textarea name="negotiationItemsText" required placeholder="每行一个图号名称，例如：A-0615 / 铝件机加工"></textarea>
+              </label>
+              <label>
+                下次跟进日期
+                <input name="followUpDate" type="date" data-optional-date />
+              </label>
+              <button class="primary-button" type="submit">保存纪要</button>
+              <button class="ghost-button" id="negotiation-cancel-button" type="button">取消</button>
+            </form>
+          </section>
+
+          <section class="panel" id="negotiation-edit-panel" hidden>
+            <div class="panel-header">
+              <h2>修改谈判纪要</h2>
+            </div>
+            <form class="form-grid" id="negotiation-edit-form">
+              <label>
+                谈判日期
+                <input name="meetingDate" required type="date" />
+              </label>
+              <label>
+                纪要编号
+                <input name="negotiationNo" required />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                关联图号/名称
+                <textarea name="negotiationItemsText" required></textarea>
+              </label>
+              <label>
+                下次跟进日期
+                <input name="followUpDate" type="date" data-optional-date />
+              </label>
+              <button class="primary-button" type="submit">保存修改</button>
+              <button class="ghost-button" id="cancel-negotiation-edit" type="button">取消修改</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>纪要台账</h2>
+              <div class="panel-tools">
+                <button class="primary-button" id="negotiation-toggle-button" type="button">新增谈判纪要</button>
+                <input class="search" id="negotiation-search" placeholder="搜索编号、外协方、图号或名称" />
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:40px"></th>
+                    <th>编号</th>
+                    <th>日期</th>
+                    <th>外协方</th>
+                    <th>跟进日期</th>
+                    <th>价格库状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="negotiations-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="pricingProcesses">
+          <section class="panel" id="pricing-process-create-panel" hidden>
+            <div class="panel-header">
+              <h2>新增定价流程</h2>
+            </div>
+            <form class="form-grid" id="pricing-process-form">
+              <label>
+                定价日期
+                <input name="pricingDate" required type="date" />
+              </label>
+              <label>
+                价格单号
+                <input name="pricingNo" placeholder="留空自动生成，例如：PJ-20260616-001" />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                定价明细
+                <textarea name="pricingItemsText" required placeholder="每行一个明细，例如：A-0615 / 铝件机加工 / CNC / 120件 / 38元"></textarea>
+              </label>
+              <div class="span-2 form-field-tools">
+                <a class="ghost-button" href="templates/定价流程导入模板.xlsx" download>下载导入模板</a>
+                <label class="primary-button" for="pricing-process-excel-import">导入Excel</label>
+                <input id="pricing-process-excel-import" type="file" accept=".xlsx,.xls" hidden />
+              </div>
+              <label>
+                下次跟进日期
+                <input name="followUpDate" type="date" data-optional-date />
+              </label>
+              <button class="primary-button" type="submit">保存流程</button>
+              <button class="ghost-button" id="pricing-process-cancel-button" type="button">取消</button>
+            </form>
+          </section>
+
+          <section class="panel" id="pricing-process-edit-panel" hidden>
+            <div class="panel-header">
+              <h2>修改定价流程</h2>
+            </div>
+            <form class="form-grid" id="pricing-process-edit-form">
+              <label>
+                定价日期
+                <input name="pricingDate" required type="date" />
+              </label>
+              <label>
+                价格单号
+                <input name="pricingNo" required />
+              </label>
+              <label>
+                外协方
+                <input name="vendor" required />
+              </label>
+              <label>
+                定价明细
+                <textarea name="pricingItemsText" required placeholder="每行一个明细，例如：A-0615 / 铝件机加工 / CNC / 120件 / 38元"></textarea>
+              </label>
+              <div class="span-2 form-field-tools">
+                <a class="ghost-button" href="templates/定价流程导入模板.xlsx" download>下载导入模板</a>
+                <label class="primary-button" for="pricing-process-edit-excel-import">导入Excel</label>
+                <input id="pricing-process-edit-excel-import" type="file" accept=".xlsx,.xls" hidden />
+              </div>
+              <label>
+                下次跟进日期
+                <input name="followUpDate" type="date" data-optional-date />
+              </label>
+              <button class="primary-button" type="submit">保存修改</button>
+              <button class="ghost-button" id="cancel-pricing-process-edit" type="button">取消修改</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>定价流程台账</h2>
+              <div class="panel-tools">
+                <button class="primary-button" id="pricing-process-toggle-button" type="button">新增定价流程</button>
+                <input class="search" id="pricing-process-search" placeholder="搜索价格单号、外协方、图号、名称、工序或单价" />
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:40px"></th>
+                    <th>价格单号</th>
+                    <th>日期</th>
+                    <th>外协方</th>
+                    <th>跟进日期</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="pricing-processes-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
         <section class="view" id="prices">
           <section class="panel" id="price-create-panel" hidden>
             <div class="panel-header">
@@ -390,6 +576,10 @@
               <label>
                 价格单号
                 <input name="priceSheetNo" placeholder="例如：PJ-20260615-001" />
+              </label>
+              <label class="span-2">
+                备注
+                <input name="note" placeholder="适用条件、报价说明、附件位置等" />
               </label>
               <button class="primary-button" id="price-submit-button" type="submit">新增价格</button>
               <button class="ghost-button" id="price-cancel-button" type="button">取消</button>
@@ -441,6 +631,10 @@
                 价格单号
                 <input name="priceSheetNo" />
               </label>
+              <label class="span-2">
+                备注
+                <input name="note" />
+              </label>
               <button class="primary-button" type="submit">保存修改</button>
               <button class="ghost-button" id="cancel-price-edit" type="button">取消修改</button>
             </form>
@@ -455,7 +649,7 @@
                 <input id="price-excel-import" type="file" accept=".xlsx,.xls" hidden />
                 <button class="primary-button" id="price-export-excel" type="button">导出Excel</button>
                 <button class="primary-button" id="price-toggle-button" type="button">单个新增价格</button>
-                <input class="search" id="price-search" placeholder="搜索外协方、图号、名称、工序" />
+                <input class="search" id="price-search" placeholder="搜索外协方、图号、名称、工序、备注" />
               </div>
             </div>
             <div class="price-filters">
@@ -503,6 +697,7 @@
                     <th>税率</th>
                     <th>谈判纪要编号</th>
                     <th>价格单号</th>
+                    <th>备注</th>
                     <th>操作</th>
                   </tr>
                 </thead>
@@ -703,93 +898,6 @@
                   </tr>
                 </thead>
                 <tbody id="contracts-table"></tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <section class="view" id="negotiations">
-          <section class="panel" id="negotiation-create-panel" hidden>
-            <div class="panel-header">
-              <h2>新增谈判纪要</h2>
-            </div>
-            <form class="form-grid" id="negotiation-form">
-              <label>
-                谈判日期
-                <input name="meetingDate" required type="date" />
-              </label>
-              <label>
-                纪要编号
-                <input name="negotiationNo" placeholder="留空自动生成，例如：JY-20260616-001" />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <label>
-                关联图号/名称
-                <textarea name="negotiationItemsText" required placeholder="每行一个图号名称，例如：A-0615 / 铝件机加工"></textarea>
-              </label>
-              <label>
-                下次跟进日期
-                <input name="followUpDate" type="date" data-optional-date />
-              </label>
-              <button class="primary-button" type="submit">保存纪要</button>
-              <button class="ghost-button" id="negotiation-cancel-button" type="button">取消</button>
-            </form>
-          </section>
-
-          <section class="panel" id="negotiation-edit-panel" hidden>
-            <div class="panel-header">
-              <h2>修改谈判纪要</h2>
-            </div>
-            <form class="form-grid" id="negotiation-edit-form">
-              <label>
-                谈判日期
-                <input name="meetingDate" required type="date" />
-              </label>
-              <label>
-                纪要编号
-                <input name="negotiationNo" required />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <label>
-                关联图号/名称
-                <textarea name="negotiationItemsText" required></textarea>
-              </label>
-              <label>
-                下次跟进日期
-                <input name="followUpDate" type="date" data-optional-date />
-              </label>
-              <button class="primary-button" type="submit">保存修改</button>
-              <button class="ghost-button" id="cancel-negotiation-edit" type="button">取消修改</button>
-            </form>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <h2>纪要台账</h2>
-              <div class="panel-tools">
-                <button class="primary-button" id="negotiation-toggle-button" type="button">新增谈判纪要</button>
-                <input class="search" id="negotiation-search" placeholder="搜索编号、外协方、图号或名称" />
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width:40px"></th>
-                    <th>编号</th>
-                    <th>日期</th>
-                    <th>外协方</th>
-                    <th>跟进日期</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody id="negotiations-table"></tbody>
               </table>
             </div>
           </section>

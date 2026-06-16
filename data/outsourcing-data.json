@@ -4,7 +4,7 @@
     "appVersion": "0.5.0",
     "schemaVersion": 1,
     "storageKey": "outsourcing-management-data",
-    "savedAt": "2026-06-15T17:05:35.459Z",
+    "savedAt": "2026-06-16T17:13:20.994Z",
     "storage": "local-json-file"
   },
   "data": {
@@ -88,65 +88,7 @@
         "note": "纸箱加防潮袋"
       }
     ],
-    "prices": [
-      {
-        "id": "price-001",
-        "drawingNo": "A-0615",
-        "name": "铝件机加工",
-        "vendor": "华东精密加工",
-        "item": "CNC",
-        "unit": "件",
-        "price": 38,
-        "effectiveDate": "2026-06-01",
-        "taxRate": 13,
-        "negotiationNo": "001",
-        "priceSheetNo": "MGJB-2026-0001"
-      },
-      {
-        "id": "price-002",
-        "drawingNo": "E-0625",
-        "name": "激光切割",
-        "vendor": "华东精密加工",
-        "item": "激光切割",
-        "unit": "件",
-        "price": 22,
-        "effectiveDate": "2026-06-01",
-        "taxRate": 13
-      },
-      {
-        "id": "price-003",
-        "drawingNo": "B-0620",
-        "name": "表面喷涂",
-        "vendor": "华东表面处理",
-        "item": "喷涂",
-        "unit": "件",
-        "price": 8.5,
-        "effectiveDate": "2026-06-01",
-        "taxRate": 13
-      },
-      {
-        "id": "price-004",
-        "drawingNo": "C-0622",
-        "name": "热处理批次",
-        "vendor": "苏南热处理",
-        "item": "热处理",
-        "unit": "件",
-        "price": 6.8,
-        "effectiveDate": "2026-06-05",
-        "taxRate": 13
-      },
-      {
-        "id": "price-005",
-        "drawingNo": "D-0624",
-        "name": "镀锌件",
-        "vendor": "江北电镀",
-        "item": "镀锌",
-        "unit": "件",
-        "price": 2.4,
-        "effectiveDate": "2026-06-03",
-        "taxRate": 13
-      }
-    ],
+    "prices": [],
     "progress": [
       {
         "id": "progress-001",
@@ -274,6 +216,24 @@
         "actionItems": "合同条款中补充检测报告要求。"
       }
     ],
+    "pricingProcesses": [
+      {
+        "id": "4ea2ef65-62ef-4570-96c8-6e04a45a0c56",
+        "pricingDate": "2026-06-15",
+        "pricingNo": "PJ-20260615-001",
+        "vendor": "1",
+        "followUpDate": "",
+        "project": "001/002/1/1/1",
+        "pricingItems": [
+          {
+            "label": "001/002/1/1/1"
+          }
+        ],
+        "priceImportStatus": "已导入价格库",
+        "priceImportedAt": "2026-06-15T18:00:13.033Z",
+        "priceImportedCount": 1
+      }
+    ],
     "accounts": [
       {
         "id": "account-001",
@@ -295,18 +255,16 @@
       {
         "id": "account-002",
         "vendor": "华东表面处理",
-        "project": "B-0620 表面喷涂",
+        "project": "B-0620 / 表面喷涂",
         "accountItems": [
           {
-            "label": "B-0620 / 表面喷涂",
-            "drawingNo": "B-0620",
-            "name": "表面喷涂"
+            "label": "B-0620 / 表面喷涂"
           }
         ],
         "amount": 680,
         "accountDate": "2026-06-14",
         "dueDate": "2026-07-14",
-        "payStatus": "部分付款",
+        "payStatus": "未付款",
         "voucher": "对账单 DZ-0614"
       }
     ]

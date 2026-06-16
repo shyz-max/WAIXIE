@@ -23,6 +23,7 @@ var defaultEnvelope = {
     progress: [],
     contracts: [],
     negotiations: [],
+    pricingProcesses: [],
     accounts: [],
   },
 };

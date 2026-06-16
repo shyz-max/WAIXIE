@@ -24,6 +24,7 @@ const defaultEnvelope = {
     progress: [],
     contracts: [],
     negotiations: [],
+    pricingProcesses: [],
     accounts: [],
   },
 };
