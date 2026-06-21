@@ -9,6 +9,7 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar" aria-label="模块导航">
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" title="收起侧边栏">◀</button>
         <div class="brand">
           <span class="brand-mark">协</span>
           <div>
@@ -18,14 +19,15 @@
         </div>
         <nav class="nav">
           <button class="nav-item active" data-view="dashboard" type="button">概览</button>
-          <button class="nav-item" data-view="plans" type="button">新增外协计划</button>
-          <button class="nav-item" data-view="tasks" type="button">外协任务汇总</button>
+          <button class="nav-item" data-view="tasks" type="button">&#22806;&#21327;&#35745;&#21010;&#27719;&#24635;</button>
+          <button class="nav-item" data-view="procedures" type="button">&#24037;&#33402;&#35268;&#31243;&#24211;</button>
           <button class="nav-item" data-view="negotiations" type="button">谈判纪要</button>
           <button class="nav-item" data-view="pricingProcesses" type="button">定价流程</button>
           <button class="nav-item" data-view="prices" type="button">价格库</button>
           <button class="nav-item" data-view="progress" type="button">外协进度</button>
           <button class="nav-item" data-view="contracts" type="button">外协合同</button>
           <button class="nav-item" data-view="accounts" type="button">挂账管理</button>
+          <button class="nav-item" data-view="vendors" type="button">供应商</button>
         </nav>
       </aside>
 
@@ -69,9 +71,31 @@
             </article>
           </div>
 
+          <div class="chart-row" id="vendor-chart-panel">
+            <section class="panel collapsed">
+              <div class="panel-header" data-toggle-panel="vendor-chart">
+                <h2>厂家任务分布</h2>
+              </div>
+              <div class="table-wrap">
+                <div class="bar-chart" id="vendor-bar-chart"></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="chart-row">
+            <section class="panel collapsed">
+              <div class="panel-header" data-toggle-panel="gantt">
+                <h2>厂家任务甘特图</h2>
+              </div>
+              <div class="table-wrap">
+                <div class="gantt-chart" id="gantt-chart"></div>
+              </div>
+            </section>
+          </div>
+
           <div class="two-column">
-            <section class="panel">
-              <div class="panel-header">
+            <section class="panel collapsed">
+              <div class="panel-header" data-toggle-panel="monthly">
                 <h2>每月暂估</h2>
               </div>
               <div class="table-wrap">
@@ -89,8 +113,8 @@
               </div>
             </section>
 
-            <section class="panel">
-              <div class="panel-header">
+            <section class="panel collapsed">
+              <div class="panel-header" data-toggle-panel="upcoming">
                 <h2>近期交付</h2>
               </div>
               <div class="table-wrap">
@@ -109,8 +133,8 @@
               </div>
             </section>
 
-            <section class="panel">
-              <div class="panel-header">
+            <section class="panel collapsed">
+              <div class="panel-header" data-toggle-panel="account">
                 <h2>挂账提醒</h2>
               </div>
               <div class="table-wrap">
@@ -128,8 +152,8 @@
               </div>
             </section>
 
-            <section class="panel">
-              <div class="panel-header">
+            <section class="panel collapsed">
+              <div class="panel-header" data-toggle-panel="contract">
                 <h2>合同提醒</h2>
               </div>
               <div class="table-wrap">
@@ -146,201 +170,94 @@
                 </table>
               </div>
             </section>
-
-            <section class="panel">
-              <div class="panel-header">
-                <h2>谈判跟进</h2>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>编号</th>
-                      <th>外协方</th>
-                      <th>图号/名称</th>
-                      <th>跟进日期</th>
-                    </tr>
-                  </thead>
-                  <tbody id="negotiation-alerts-table"></tbody>
-                </table>
-              </div>
-            </section>
           </div>
         </section>
 
-        <section class="view" id="plans">
+          <section class="view" id="tasks">
           <section class="panel">
             <div class="panel-header">
-              <h2>新增外协计划</h2>
-            </div>
-            <form class="form-grid" id="plan-form">
-              <label>
-                图号
-                <input name="drawingNo" required placeholder="例如：A-0613" />
-              </label>
-              <label>
-                名称
-                <input name="name" required placeholder="例如：机加工批次" />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required placeholder="供应商或加工厂名称" />
-              </label>
-              <label>
-                工序/内容
-                <input name="process" required placeholder="例如：喷涂、热处理、CNC" />
-              </label>
-              <label>
-                数量
-                <input name="quantity" min="1" required type="number" />
-              </label>
-              <label>
-                计划交期
-                <input name="dueDate" required type="date" />
-              </label>
-              <label>
-                优先级
-                <select name="priority">
-                  <option>普通</option>
-                  <option>加急</option>
-                  <option>重点</option>
-                </select>
-              </label>
-              <label class="span-2">
-                备注
-                <input name="note" placeholder="质量要求、图纸版本、包装要求等" />
-              </label>
-              <button class="primary-button" type="submit">保存计划</button>
-            </form>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <h2>计划列表</h2>
+              <h2>&#22806;&#21327;&#35745;&#21010;&#27719;&#24635;</h2>
               <div class="panel-tools">
-                <a class="ghost-button" href="templates/外协计划导入模板.xlsx" download>下载导入模板</a>
-                <label class="primary-button" for="plan-excel-import">导入Excel</label>
+                <button class="ghost-button compact-button" id="select-all-tasks" type="button">全选筛选结果</button>
+                <button class="ghost-button compact-button" id="clear-task-selection" type="button">清空选择</button>
+                <button class="danger-button compact-button" id="batch-delete-tasks" type="button">批量删除</button>
+                <button class="ghost-button compact-button" id="export-tasks-excel" type="button">导出Excel</button>
+                <button class="ghost-button compact-button" id="toggle-contract-panel" type="button">&#9654; 一键签合同</button>
+                <a class="ghost-button" href="templates/&#22806;&#21327;&#35745;&#21010;&#23548;&#20837;&#27169;&#26495;.xlsx" download>&#19979;&#36733;&#23548;&#20837;&#27169;&#26495;</a>
+                <label class="primary-button" for="plan-excel-import">&#23548;&#20837;Excel</label>
                 <input id="plan-excel-import" type="file" accept=".xlsx,.xls" hidden />
-                <input class="search" id="plan-search" placeholder="搜索任务编号、图号、名称、外协方、工序" />
+                <input class="search" id="task-search" placeholder="&#25628;&#32034;&#20219;&#21153;&#32534;&#21495;&#12289;&#22270;&#21495;&#12289;&#21517;&#31216;&#12289;&#22806;&#21327;&#26041;&#12289;&#24037;&#24207;" />
+              </div>
+            </div>
+            <div class="task-toolbar">
+              <div class="task-contract-panel" id="task-contract-panel" hidden>
+                <label>
+                  合同编号前缀
+                  <input id="task-contract-no" placeholder="留空自动生成 WX-日期-序号" />
+                </label>
+                <label>
+                  签订日期
+                  <input id="task-sign-date" type="date" />
+                </label>
+                <button class="primary-button" id="create-contract-from-tasks" type="button">一键签合同</button>
               </div>
             </div>
             <div class="table-wrap">
-              <table>
+              <table class="task-summary-table">
+                <colgroup>
+                  <col class="task-col-check" />
+                  <col class="task-col-task" />
+                  <col class="task-col-batch" />
+                  <col class="task-col-drawing" />
+                  <col class="task-col-name" />
+                  <col class="task-col-task-category" />
+                  <col class="task-col-outsource-category" />
+                  <col class="task-col-product-category" />
+                  <col class="task-col-abc-category" />
+                  <col class="task-col-usage" />
+                  <col class="task-col-vendor" />
+                  <col class="task-col-process" />
+                  <col class="task-col-quantity" />
+                  <col class="task-col-date" />
+                  <col class="task-col-progress" />
+                  <col class="task-col-price-status" />
+                  <col class="task-col-contract-status" />
+                  <col class="task-col-contract" />
+                  <col class="task-col-account-status" />
+                  <col class="task-col-price" />
+                  <col class="task-col-amount" />
+                  <col class="task-col-actions" />
+                </colgroup>
                 <thead>
                   <tr>
-                    <th>任务编号</th>
-                    <th>图号</th>
-                    <th>名称</th>
-                    <th>外协方</th>
-                    <th>工序</th>
-                    <th>数量</th>
-                    <th>交期</th>
-                    <th>优先级</th>
-                    <th>操作</th>
+                      <th><input id="task-check-all" type="checkbox" /></th><th>&#20219;&#21153;&#32534;&#21495;</th><th>&#25209;&#27425;</th><th>&#22270;&#21495;</th><th>&#21517;&#31216;</th><th>&#20219;&#21153;&#31867;&#21035;</th><th>&#22806;&#21327;&#31867;&#21035;</th><th>&#22806;&#21327;&#20135;&#21697;&#31867;&#21035;</th><th>ABC&#31867;&#21035;</th><th>&#39046;&#29992;&#29992;&#36884;</th><th>&#35745;&#21010;&#22806;&#21327;&#26041;</th><th>&#24037;&#24207;</th><th>&#25968;&#37327;</th><th>&#35201;&#27714;&#23436;&#25104;&#26102;&#38388;</th><th>&#20219;&#21153;&#36827;&#24230;</th><th>&#20215;&#26684;&#29366;&#24577;</th><th>&#21512;&#21516;&#29366;&#24577;</th><th>&#21512;&#21516;&#32534;&#21495;</th><th>&#25346;&#36134;&#29366;&#24577;</th><th>&#21333;&#20215;</th><th>&#39044;&#20272;&#37329;&#39069;</th><th>&#25805;&#20316;</th>
+                  </tr>
+                  <tr class="filter-row" data-module="tasks">
+                    <th></th><th><input class="th-filter" data-module="tasks" data-column="&#20219;&#21153;&#32534;&#21495;" list="fl-tasks-&#20219;&#21153;&#32534;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#25209;&#27425;" list="fl-tasks-&#25209;&#27425;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#22270;&#21495;" list="fl-tasks-&#22270;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#21517;&#31216;" list="fl-tasks-&#21517;&#31216;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#20219;&#21153;&#31867;&#21035;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#22806;&#21327;&#31867;&#21035;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#22806;&#21327;&#20135;&#21697;&#31867;&#21035;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="ABC&#31867;&#21035;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#39046;&#29992;&#29992;&#36884;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#35745;&#21010;&#22806;&#21327;&#26041;" list="fl-tasks-&#35745;&#21010;&#22806;&#21327;&#26041;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#24037;&#24207;" list="fl-tasks-&#24037;&#24207;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="quantity" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#35201;&#27714;&#23436;&#25104;&#26102;&#38388;" list="fl-tasks-&#35201;&#27714;&#23436;&#25104;&#26102;&#38388;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#20219;&#21153;&#36827;&#24230;" list="fl-tasks-&#20219;&#21153;&#36827;&#24230;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#20215;&#26684;&#29366;&#24577;" list="fl-tasks-&#20215;&#26684;&#29366;&#24577;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#21512;&#21516;&#29366;&#24577;" list="fl-tasks-&#21512;&#21516;&#29366;&#24577;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#21512;&#21516;&#32534;&#21495;" list="fl-tasks-&#21512;&#21516;&#32534;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="&#25346;&#36134;&#29366;&#24577;" list="fl-tasks-&#25346;&#36134;&#29366;&#24577;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="unitPrice" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="tasks" data-column="amount" placeholder="&#20840;&#37096;" /></th><th></th>
                   </tr>
                 </thead>
-                <tbody id="plans-table"></tbody>
+                <tbody id="tasks-table"></tbody>
               </table>
             </div>
           </section>
         </section>
 
-        <section class="view" id="tasks">
+        <section class="view" id="procedures">
           <section class="panel">
             <div class="panel-header">
-              <h2>任务操作</h2>
-            </div>
-            <div class="task-toolbar">
-              <label>
-                选择厂家
-                <select id="task-vendor-select"></select>
-              </label>
-              <label>
-                合同编号
-                <input id="task-contract-no" placeholder="留空自动生成" />
-              </label>
-              <label>
-                签订日期
-                <input id="task-sign-date" type="date" />
-              </label>
-              <label>
-                挂账到期
-                <input id="task-account-due-date" type="date" />
-              </label>
-              <div class="task-actions">
-                <button class="ghost-button" id="select-all-tasks" type="button">全选任务</button>
-                <button class="ghost-button" id="clear-task-selection" type="button">清空选择</button>
-                <button class="primary-button" id="create-contract-from-tasks" type="button">一键签合同</button>
-                <button class="primary-button" id="create-account-from-tasks" type="button">一键挂账</button>
+              <h2>&#24037;&#33402;&#35268;&#31243;&#24211;</h2>
+              <div class="panel-tools">
+                <button class="primary-button" id="procedure-toggle-button" type="button">新增工艺规程</button>
+                <input class="search" id="procedure-search" placeholder="&#25628;&#32034;&#22270;&#21495;&#12289;&#21517;&#31216;&#12289;&#24037;&#24207;&#12289;PDF&#25991;&#20214;" />
               </div>
             </div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <h2>外协任务汇总</h2>
-              <input class="search" id="task-search" placeholder="搜索任务编号、图号、名称、外协方、工序" />
-            </div>
-            <div class="task-filters">
-              <label>
-                外协方
-                <select id="task-filter-vendor">
-                  <option value="">全部外协方</option>
-                </select>
-              </label>
-              <label>
-                任务进度
-                <select id="task-filter-progress">
-                  <option value="">全部进度</option>
-                  <option>待发出</option>
-                  <option>已发出</option>
-                  <option>进行中</option>
-                  <option>加工中</option>
-                  <option>待检验</option>
-                  <option>已交付</option>
-                  <option>已完成</option>
-                  <option>异常</option>
-                </select>
-              </label>
-              <label>
-                价格状态
-                <select id="task-filter-price">
-                  <option value="">全部价格状态</option>
-                  <option value="priced">已有价格</option>
-                  <option value="missing">缺少价格</option>
-                </select>
-              </label>
-              <label>
-                合同状态
-                <select id="task-filter-contract">
-                  <option value="">全部合同状态</option>
-                  <option value="signed">已签合同</option>
-                  <option value="unsigned">未签合同</option>
-                </select>
-              </label>
-              <button class="ghost-button" id="clear-task-filters" type="button">清空筛选</button>
-            </div>
             <div class="table-wrap">
-              <table>
+              <table class="procedure-table">
                 <thead>
-                  <tr>
-                    <th><input id="task-check-all" type="checkbox" /></th>
-                    <th>任务编号</th>
-                    <th>图号</th>
-                    <th>名称</th>
-                    <th>计划外协方</th>
-                    <th>工序</th>
-                    <th>数量</th>
-                    <th>交期</th>
-                    <th>任务进度</th>
-                    <th>价格状态</th>
-                    <th>合同状态</th>
-                    <th>合同编号</th>
-                    <th>单价</th>
-                    <th>预计金额</th>
-                  </tr>
+                  <tr><th>&#22270;&#21495;</th><th>&#21517;&#31216;</th><th>&#24037;&#24207;</th><th>PDF&#25991;&#20214;</th><th>&#19978;&#20256;&#26102;&#38388;</th><th>&#25805;&#20316;</th></tr>
+                  <tr class="filter-row" data-module="procedures"><th><input class="th-filter" data-module="procedures" data-column="&#22270;&#21495;" list="fl-procedures-&#22270;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="procedures" data-column="&#21517;&#31216;" list="fl-procedures-&#21517;&#31216;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="procedures" data-column="&#24037;&#24207;" list="fl-procedures-&#24037;&#24207;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="procedures" data-column="fileName" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="procedures" data-column="uploadedAt" placeholder="&#20840;&#37096;" /></th><th></th></tr>
                 </thead>
-                <tbody id="tasks-table"></tbody>
+                <tbody id="procedures-table"></tbody>
               </table>
             </div>
           </section>
@@ -377,36 +294,6 @@
             </form>
           </section>
 
-          <section class="panel" id="negotiation-edit-panel" hidden>
-            <div class="panel-header">
-              <h2>修改谈判纪要</h2>
-            </div>
-            <form class="form-grid" id="negotiation-edit-form">
-              <label>
-                谈判日期
-                <input name="meetingDate" required type="date" />
-              </label>
-              <label>
-                纪要编号
-                <input name="negotiationNo" required />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <label>
-                关联图号/名称
-                <textarea name="negotiationItemsText" required></textarea>
-              </label>
-              <label>
-                下次跟进日期
-                <input name="followUpDate" type="date" data-optional-date />
-              </label>
-              <button class="primary-button" type="submit">保存修改</button>
-              <button class="ghost-button" id="cancel-negotiation-edit" type="button">取消修改</button>
-            </form>
-          </section>
-
           <section class="panel">
             <div class="panel-header">
               <h2>纪要台账</h2>
@@ -417,16 +304,9 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th style="width:40px"></th>
-                    <th>编号</th>
-                    <th>日期</th>
-                    <th>外协方</th>
-                    <th>跟进日期</th>
-                    <th>价格库状态</th>
-                    <th>操作</th>
-                  </tr>
+                                <thead>
+                  <tr><th style="width:40px"></th><th>&#32534;&#21495;</th><th>&#26085;&#26399;</th><th>&#22806;&#21327;&#26041;</th><th>&#36319;&#36827;&#26085;&#26399;</th><th>&#25805;&#20316;</th></tr>
+                  <tr class="filter-row" data-module="negotiations"><th></th><th><input class="th-filter" data-module="negotiations" data-column="&#32534;&#21495;" list="fl-negotiations-&#32534;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="negotiations" data-column="&#26085;&#26399;" list="fl-negotiations-&#26085;&#26399;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="negotiations" data-column="&#22806;&#21327;&#26041;" list="fl-negotiations-&#22806;&#21327;&#26041;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="negotiations" data-column="&#36319;&#36827;&#26085;&#26399;" list="fl-negotiations-&#36319;&#36827;&#26085;&#26399;" placeholder="&#20840;&#37096;" /></th><th></th></tr>
                 </thead>
                 <tbody id="negotiations-table"></tbody>
               </table>
@@ -515,15 +395,9 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th style="width:40px"></th>
-                    <th>价格单号</th>
-                    <th>日期</th>
-                    <th>外协方</th>
-                    <th>跟进日期</th>
-                    <th>操作</th>
-                  </tr>
+                                <thead>
+                  <tr><th style="width:40px"></th><th>&#20215;&#26684;&#21333;&#21495;</th><th>&#26085;&#26399;</th><th>&#22806;&#21327;&#26041;</th><th>&#36319;&#36827;&#26085;&#26399;</th><th>&#20215;&#26684;&#24211;&#29366;&#24577;</th><th>&#25805;&#20316;</th></tr>
+                  <tr class="filter-row" data-module="pricingProcesses"><th></th><th><input class="th-filter" data-module="pricingProcesses" data-column="&#20215;&#26684;&#21333;&#21495;" list="fl-pricingProcesses-&#20215;&#26684;&#21333;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="pricingProcesses" data-column="&#26085;&#26399;" list="fl-pricingProcesses-&#26085;&#26399;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="pricingProcesses" data-column="&#22806;&#21327;&#26041;" list="fl-pricingProcesses-&#22806;&#21327;&#26041;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="pricingProcesses" data-column="&#36319;&#36827;&#26085;&#26399;" list="fl-pricingProcesses-&#36319;&#36827;&#26085;&#26399;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="pricingProcesses" data-column="&#20215;&#26684;&#24211;&#29366;&#24577;" list="fl-pricingProcesses-&#20215;&#26684;&#24211;&#29366;&#24577;" placeholder="&#20840;&#37096;" /></th><th></th></tr>
                 </thead>
                 <tbody id="pricing-processes-table"></tbody>
               </table>
@@ -552,6 +426,10 @@
               <label>
                 工序/物料
                 <input name="item" required />
+              </label>
+              <label>
+                计划中的工序
+                <textarea name="plannedProcessesText" required placeholder="每行一个计划工序，例如：车削&#10;铣削"></textarea>
               </label>
               <label>
                 单位
@@ -586,61 +464,7 @@
             </form>
           </section>
 
-          <section class="panel" id="price-edit-panel" hidden>
-            <div class="panel-header">
-              <h2>修改价格</h2>
-            </div>
-            <form class="form-grid" id="price-edit-form">
-              <label>
-                图号
-                <input name="drawingNo" required />
-              </label>
-              <label>
-                名称
-                <input name="name" required />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <label>
-                工序/物料
-                <input name="item" readonly />
-              </label>
-              <label>
-                单位
-                <input name="unit" required />
-              </label>
-              <label>
-                单价
-                <input name="price" min="0" required step="0.01" type="number" />
-              </label>
-              <label>
-                生效日期
-                <input name="effectiveDate" required type="date" />
-              </label>
-              <label>
-                税率
-                <input name="taxRate" min="0" step="0.01" type="number" />
-              </label>
-              <label>
-                谈判纪要编号
-                <input name="negotiationNo" />
-              </label>
-              <label>
-                价格单号
-                <input name="priceSheetNo" />
-              </label>
-              <label class="span-2">
-                备注
-                <input name="note" />
-              </label>
-              <button class="primary-button" type="submit">保存修改</button>
-              <button class="ghost-button" id="cancel-price-edit" type="button">取消修改</button>
-            </form>
-          </section>
-
-          <section class="panel">
+                    <section class="panel">
             <div class="panel-header">
               <h2>价格台账</h2>
               <div class="panel-tools">
@@ -652,54 +476,11 @@
                 <input class="search" id="price-search" placeholder="搜索外协方、图号、名称、工序、备注" />
               </div>
             </div>
-            <div class="price-filters">
-              <label>
-                外协方
-                <select id="price-filter-vendor">
-                  <option value="">全部外协方</option>
-                </select>
-              </label>
-              <label>
-                工序/物料
-                <select id="price-filter-item">
-                  <option value="">全部工序/物料</option>
-                </select>
-              </label>
-              <label>
-                生效日期起
-                <input id="price-filter-date-from" type="date" data-optional-date />
-              </label>
-              <label>
-                生效日期止
-                <input id="price-filter-date-to" type="date" data-optional-date />
-              </label>
-              <label>
-                关联任务
-                <select id="price-filter-related">
-                  <option value="">全部</option>
-                  <option value="related">有关联任务</option>
-                  <option value="unrelated">无关联任务</option>
-                </select>
-              </label>
-              <button class="ghost-button" id="clear-price-filters" type="button">清空筛选</button>
-            </div>
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th>外协方</th>
-                    <th>图号</th>
-                    <th>名称</th>
-                    <th>工序/物料</th>
-                    <th>单位</th>
-                    <th>单价</th>
-                    <th>生效日期</th>
-                    <th>税率</th>
-                    <th>谈判纪要编号</th>
-                    <th>价格单号</th>
-                    <th>备注</th>
-                    <th>操作</th>
-                  </tr>
+                                <thead>
+                  <tr><th style="width:40px"></th><th>&#22806;&#21327;&#26041;</th><th>&#22270;&#21495;</th><th>&#21517;&#31216;</th><th>&#24037;&#24207;/&#29289;&#26009;</th><th>&#21333;&#20301;</th><th>&#21333;&#20215;</th><th>&#29983;&#25928;&#26085;&#26399;</th><th>&#31246;&#29575;</th><th>&#35848;&#21028;&#32426;&#35201;&#32534;&#21495;</th><th>&#20215;&#26684;&#21333;&#21495;</th><th>&#22791;&#27880;</th><th>&#25805;&#20316;</th></tr>
+                  <tr class="filter-row" data-module="prices"><th></th><th><input class="th-filter" data-module="prices" data-column="&#22806;&#21327;&#26041;" list="fl-prices-&#22806;&#21327;&#26041;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#22270;&#21495;" list="fl-prices-&#22270;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#21517;&#31216;" list="fl-prices-&#21517;&#31216;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#24037;&#24207;/&#29289;&#26009;" list="fl-prices-&#24037;&#24207;/&#29289;&#26009;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#21333;&#20301;" list="fl-prices-&#21333;&#20301;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#21333;&#20215;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#29983;&#25928;&#26085;&#26399;" list="fl-prices-&#29983;&#25928;&#26085;&#26399;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#31246;&#29575;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#35848;&#21028;&#32426;&#35201;&#32534;&#21495;" list="fl-prices-&#35848;&#21028;&#32426;&#35201;&#32534;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#20215;&#26684;&#21333;&#21495;" list="fl-prices-&#20215;&#26684;&#21333;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="prices" data-column="&#22791;&#27880;" list="fl-prices-&#22791;&#27880;" placeholder="&#20840;&#37096;" /></th><th></th></tr>
                 </thead>
                 <tbody id="prices-table"></tbody>
               </table>
@@ -752,17 +533,9 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th>图号</th>
-                    <th>名称</th>
-                    <th>外协方</th>
-                    <th>状态</th>
-                    <th>完成率</th>
-                    <th>更新时间</th>
-                    <th>说明</th>
-                    <th>操作</th>
-                  </tr>
+                                <thead>
+                  <tr><th>&#22270;&#21495;</th><th>&#21517;&#31216;</th><th>&#22806;&#21327;&#26041;</th><th>&#29366;&#24577;</th><th>&#23436;&#25104;&#29575;</th><th>&#26356;&#26032;&#26102;&#38388;</th><th>&#35828;&#26126;</th><th>&#25805;&#20316;</th></tr>
+                  <tr class="filter-row" data-module="progress"><th><input class="th-filter" data-module="progress" data-column="&#22270;&#21495;" list="fl-progress-&#22270;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="progress" data-column="&#21517;&#31216;" list="fl-progress-&#21517;&#31216;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="progress" data-column="&#22806;&#21327;&#26041;" list="fl-progress-&#22806;&#21327;&#26041;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="progress" data-column="&#29366;&#24577;" list="fl-progress-&#29366;&#24577;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="progress" data-column="&#23436;&#25104;&#29575;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="progress" data-column="&#26356;&#26032;&#26102;&#38388;" list="fl-progress-&#26356;&#26032;&#26102;&#38388;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="progress" data-column="&#35828;&#26126;" list="fl-progress-&#35828;&#26126;" placeholder="&#20840;&#37096;" /></th><th></th></tr>
                 </thead>
                 <tbody id="progress-table"></tbody>
               </table>
@@ -771,245 +544,63 @@
         </section>
 
         <section class="view" id="contracts">
-          <section class="panel" id="contract-create-panel" hidden>
-            <div class="panel-header">
-              <h2>新增外协合同</h2>
-            </div>
-            <form class="form-grid" id="contract-form">
-              <label>
-                合同编号
-                <input name="contractNo" required placeholder="例如：WX-2026-001" />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <div class="span-2 form-field-group">
-                <label>
-                  合同标的物
-                  <textarea name="contractItemsText" required placeholder="每行一个标的物，例如：TASK-0001 / A-0615 / 铝件机加工 / CNC / 120"></textarea>
-                </label>
-                <div class="form-field-tools">
-                  <a class="ghost-button" href="templates/合同标的物导入模板.xlsx" download>下载导入模板</a>
-                  <label class="primary-button" for="contract-items-excel-import">导入标的物Excel</label>
-                  <input id="contract-items-excel-import" type="file" accept=".xlsx,.xls" hidden data-target="contractItemsText" />
-                </div>
-              </div>
-              <label>
-                合同金额
-                <input name="amount" min="0" required step="0.01" type="number" />
-              </label>
-              <label>
-                签订日期
-                <input name="signDate" required type="date" />
-              </label>
-              <label>
-                合同状态
-                <select name="status">
-                  <option>草拟中</option>
-                  <option>已签订</option>
-                  <option>履行中</option>
-                  <option>已完成</option>
-                  <option>已归档</option>
-                  <option>异常</option>
-                </select>
-              </label>
-              <label class="span-2">
-                备注
-                <input name="note" placeholder="付款条款、质保要求、附件位置等" />
-              </label>
-              <button class="primary-button" type="submit">保存合同</button>
-              <button class="ghost-button" id="contract-cancel-button" type="button">取消</button>
-            </form>
-          </section>
-
-          <section class="panel" id="contract-edit-panel" hidden>
-            <div class="panel-header">
-              <h2>修改合同</h2>
-            </div>
-            <form class="form-grid" id="contract-edit-form">
-              <label>
-                合同编号
-                <input name="contractNo" required />
-              </label>
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <div class="span-2 form-field-group">
-                <label>
-                  合同标的物
-                  <textarea name="contractItemsText" required></textarea>
-                </label>
-                <div class="form-field-tools">
-                  <a class="ghost-button" href="templates/合同标的物导入模板.xlsx" download>下载导入模板</a>
-                  <label class="primary-button" for="contract-edit-items-excel-import">导入标的物Excel</label>
-                  <input id="contract-edit-items-excel-import" type="file" accept=".xlsx,.xls" hidden data-target="contractItemsText" />
-                </div>
-              </div>
-              <label>
-                合同金额
-                <input name="amount" min="0" required step="0.01" type="number" />
-              </label>
-              <label>
-                签订日期
-                <input name="signDate" required type="date" />
-              </label>
-              <label>
-                合同状态
-                <select name="status">
-                  <option>草拟中</option>
-                  <option>已签订</option>
-                  <option>履行中</option>
-                  <option>已完成</option>
-                  <option>已归档</option>
-                  <option>异常</option>
-                </select>
-              </label>
-              <label class="span-2">
-                备注
-                <input name="note" />
-              </label>
-              <button class="primary-button" type="submit">保存修改</button>
-              <button class="ghost-button" id="cancel-contract-edit" type="button">取消修改</button>
-            </form>
-          </section>
-
           <section class="panel">
             <div class="panel-header">
               <h2>合同台账</h2>
               <div class="panel-tools">
-                <button class="primary-button" id="contract-toggle-button" type="button">新增外协合同</button>
+                <button class="ghost-button compact-button" id="contract-toggle-button" type="button">新增外协合同</button>
+                <button class="ghost-button compact-button" id="contract-export-excel" type="button">导出合同汇总</button>
                 <input class="search" id="contract-search" placeholder="搜索编号、外协方、图号或名称" />
               </div>
             </div>
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th style="width:40px"></th>
-                    <th>合同编号</th>
-                    <th>外协方</th>
-                    <th>图号/名称</th>
-                    <th>金额</th>
-                    <th>签订日期</th>
-                    <th>状态</th>
-                    <th>操作</th>
-                  </tr>
+                                <thead>
+                  <tr><th style="width:40px"></th><th>&#21512;&#21516;&#32534;&#21495;</th><th>&#22806;&#21327;&#26041;</th><th>&#22270;&#21495;/&#21517;&#31216;</th><th>&#37329;&#39069;</th><th>&#31614;&#35746;&#26085;&#26399;</th><th>&#29366;&#24577;</th><th>&#25805;&#20316;</th></tr>
+                  <tr class="filter-row" data-module="contracts"><th></th><th><input class="th-filter" data-module="contracts" data-column="&#21512;&#21516;&#32534;&#21495;" list="fl-contracts-&#21512;&#21516;&#32534;&#21495;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="contracts" data-column="&#22806;&#21327;&#26041;" list="fl-contracts-&#22806;&#21327;&#26041;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="contracts" data-column="&#22270;&#21495;/&#21517;&#31216;" list="fl-contracts-&#22270;&#21495;/&#21517;&#31216;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="contracts" data-column="&#37329;&#39069;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="contracts" data-column="&#31614;&#35746;&#26085;&#26399;" list="fl-contracts-&#31614;&#35746;&#26085;&#26399;" placeholder="&#20840;&#37096;" /></th><th><input class="th-filter" data-module="contracts" data-column="&#29366;&#24577;" list="fl-contracts-&#29366;&#24577;" placeholder="&#20840;&#37096;" /></th><th></th></tr>
                 </thead>
                 <tbody id="contracts-table"></tbody>
               </table>
             </div>
           </section>
+          
         </section>
 
         <section class="view" id="accounts">
-          <section class="panel" id="account-create-panel" hidden>
-            <div class="panel-header">
-              <h2>新增挂账</h2>
-            </div>
-            <form class="form-grid" id="account-form">
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <label>
-                关联图号/名称
-                <textarea name="accountItemsText" required placeholder="每行一个图号名称，例如：A-0615 / 铝件机加工"></textarea>
-              </label>
-              <label>
-                金额
-                <input name="amount" min="0" required step="0.01" type="number" />
-              </label>
-              <label>
-                挂账日期
-                <input name="accountDate" required type="date" />
-              </label>
-              <label>
-                到期日
-                <input name="dueDate" required type="date" />
-              </label>
-              <label>
-                付款状态
-                <select name="payStatus">
-                  <option>未付款</option>
-                  <option>部分付款</option>
-                  <option>已付款</option>
-                </select>
-              </label>
-              <label class="span-2">
-                发票/凭证
-                <input name="voucher" placeholder="发票号、对账单号或备注" />
-              </label>
-              <button class="primary-button" type="submit">保存挂账</button>
-              <button class="ghost-button" id="account-cancel-button" type="button">取消</button>
-            </form>
-          </section>
-
-          <section class="panel" id="account-edit-panel" hidden>
-            <div class="panel-header">
-              <h2>修改挂账</h2>
-            </div>
-            <form class="form-grid" id="account-edit-form">
-              <label>
-                外协方
-                <input name="vendor" required />
-              </label>
-              <label>
-                关联图号/名称
-                <textarea name="accountItemsText" required></textarea>
-              </label>
-              <label>
-                金额
-                <input name="amount" min="0" required step="0.01" type="number" />
-              </label>
-              <label>
-                挂账日期
-                <input name="accountDate" required type="date" />
-              </label>
-              <label>
-                到期日
-                <input name="dueDate" required type="date" />
-              </label>
-              <label>
-                付款状态
-                <select name="payStatus">
-                  <option>未付款</option>
-                  <option>部分付款</option>
-                  <option>已付款</option>
-                </select>
-              </label>
-              <label class="span-2">
-                发票/凭证
-                <input name="voucher" />
-              </label>
-              <button class="primary-button" type="submit">保存修改</button>
-              <button class="ghost-button" id="cancel-account-edit" type="button">取消修改</button>
-            </form>
-          </section>
-
           <section class="panel">
             <div class="panel-header">
               <h2>挂账台账</h2>
               <div class="panel-tools">
-                <button class="primary-button" id="account-toggle-button" type="button">新增挂账</button>
                 <input class="search" id="account-search" placeholder="搜索外协方、图号或名称、凭证" />
               </div>
             </div>
             <div class="table-wrap">
               <table>
-                <thead>
-                  <tr>
-                    <th style="width:40px"></th>
-                    <th>外协方</th>
-                    <th>金额</th>
-                    <th>挂账日期</th>
-                    <th>到期日</th>
-                    <th>状态</th>
-                    <th>操作</th>
-                  </tr>
+                                <thead>
+                  <tr><th style="width:40px"></th><th>外协方</th><th>金额</th><th>挂账日期</th><th>到期日</th><th>网报单编号</th><th>状态</th><th>操作</th></tr>
+                  <tr class="filter-row" data-module="accounts"><th></th><th><input class="th-filter" data-module="accounts" data-column="外协方" list="fl-accounts-外协方" placeholder="全部" /></th><th><input class="th-filter" data-module="accounts" data-column="金额" placeholder="全部" /></th><th><input class="th-filter" data-module="accounts" data-column="挂账日期" list="fl-accounts-挂账日期" placeholder="全部" /></th><th><input class="th-filter" data-module="accounts" data-column="到期日" list="fl-accounts-到期日" placeholder="全部" /></th><th><input class="th-filter" data-module="accounts" data-column="网报单编号" placeholder="全部" /></th><th><input class="th-filter" data-module="accounts" data-column="状态" list="fl-accounts-状态" placeholder="全部" /></th><th></th></tr>
                 </thead>
                 <tbody id="accounts-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="vendors">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>供应商台账</h2>
+              <div class="panel-tools">
+                <button class="primary-button" id="vendor-toggle-button" type="button">新增供应商</button>
+                <input class="search" id="vendor-search" placeholder="搜索名称、联系人、电话" />
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>名称</th><th>联系人</th><th>电话</th><th>廉洁协议</th><th>安全协议</th><th>地址</th><th>备注</th><th>操作</th></tr>
+                </thead>
+                <tbody id="vendors-table"></tbody>
               </table>
             </div>
           </section>

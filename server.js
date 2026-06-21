@@ -6,6 +6,7 @@ var path = require("path");
 var rootDir = __dirname;
 var dataDir = path.join(rootDir, "data");
 var dataFile = path.join(dataDir, "outsourcing-data.json");
+var attachmentDir = path.join(rootDir, "attachments");
 var port = Number(process.env.PORT || process.argv[2] || 8765);
 var host = process.env.HOST || "0.0.0.0";
 
@@ -25,6 +26,7 @@ var defaultEnvelope = {
     negotiations: [],
     pricingProcesses: [],
     accounts: [],
+    procedures: [],
   },
 };
 
@@ -35,7 +37,15 @@ var contentTypes = {
   ".json": "application/json; charset=utf-8",
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ".xls": "application/vnd.ms-excel",
+  ".pdf": "application/pdf",
 };
+
+function safeName(value, fallback) {
+  return String(value || fallback || "file")
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, "_")
+    .replace(/\s+/g, "_")
+    .slice(0, 120);
+}
 
 function ensureDataFile(callback) {
   fs.mkdir(dataDir, { recursive: true }, function (mkdirError) {
@@ -51,6 +61,9 @@ function send(res, status, body, contentType) {
   res.writeHead(status, {
     "Content-Type": contentType || "text/plain; charset=utf-8",
     "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
   });
   res.end(body);
 }
@@ -69,6 +82,12 @@ function readRequestBody(req, callback) {
 function handleApi(req, res, callback) {
   ensureDataFile(function (ensureError) {
     if (ensureError) return callback(ensureError);
+
+    if (req.method === "OPTIONS") {
+      send(res, 204, "");
+      callback(null, true);
+      return;
+    }
 
     if (req.method === "GET" && req.url === "/api/data") {
       fs.readFile(dataFile, "utf8", function (readError, data) {
@@ -91,6 +110,66 @@ function handleApi(req, res, callback) {
           if (writeError) return callback(writeError);
           send(res, 200, JSON.stringify({ ok: true }), "application/json; charset=utf-8");
           callback(null, true);
+        });
+      });
+      return;
+    }
+
+    if (req.method === "POST" && req.url === "/api/attachments/procedure") {
+      readRequestBody(req, function (bodyError, body) {
+        if (bodyError) return callback(bodyError);
+        var parsed = JSON.parse(body);
+        var originalName = safeName(parsed.fileName || "procedure.pdf");
+        if (path.extname(originalName).toLowerCase() !== ".pdf") {
+          originalName += ".pdf";
+        }
+        var taskDirName = safeName(parsed.taskNo || "未编号");
+        var targetDir = path.join(attachmentDir, "procedure", taskDirName);
+        var fileName = Date.now() + "-" + originalName;
+        var targetFile = path.join(targetDir, fileName);
+        fs.mkdir(targetDir, { recursive: true }, function (mkdirError) {
+          if (mkdirError) return callback(mkdirError);
+          fs.writeFile(targetFile, Buffer.from(parsed.data || "", "base64"), function (writeError) {
+            if (writeError) return callback(writeError);
+            var urlPath =
+              "/attachments/procedure/" + encodeURIComponent(taskDirName) + "/" + encodeURIComponent(fileName);
+            send(
+              res,
+              200,
+              JSON.stringify({
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+                name: parsed.fileName || originalName,
+                path: urlPath,
+                url: urlPath,
+                size: Number(parsed.size || 0),
+                uploadedAt: new Date().toISOString(),
+              }),
+              "application/json; charset=utf-8",
+            );
+            callback(null, true);
+          });
+        });
+      });
+      return;
+    }
+
+    if (req.method === "POST" && req.url === "/api/attachments/vendor") {
+      readRequestBody(req, function (bodyError, body) {
+        if (bodyError) return callback(bodyError);
+        var parsed = JSON.parse(body);
+        var originalName = safeName(parsed.fileName || "file.pdf");
+        if (path.extname(originalName).toLowerCase() !== ".pdf") originalName += ".pdf";
+        var targetDir = path.join(attachmentDir, "vendor", parsed.type || "other");
+        var fileName = Date.now() + "-" + originalName;
+        var targetFile = path.join(targetDir, fileName);
+        fs.mkdir(targetDir, { recursive: true }, function (mkdirError) {
+          if (mkdirError) return callback(mkdirError);
+          fs.writeFile(targetFile, Buffer.from(parsed.data || "", "base64"), function (writeError) {
+            if (writeError) return callback(writeError);
+            var urlPath = "/attachments/vendor/" + (parsed.type || "other") + "/" + encodeURIComponent(fileName);
+            send(res, 200, JSON.stringify({ url: urlPath, path: urlPath, fileName: parsed.fileName, size: parsed.size }), "application/json; charset=utf-8");
+            callback(null, true);
+          });
         });
       });
       return;
